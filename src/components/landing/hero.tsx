@@ -1,53 +1,52 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Bot, Sparkles } from "lucide-react"
+import { ArrowRight, Bot, Sparkles, CheckCircle, Zap } from "lucide-react"
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-20 sm:pt-32 sm:pb-28">
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-      <div className="absolute top-0 right-0 -z-10 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl" />
-      <div className="absolute bottom-0 left-0 -z-10 h-96 w-96 rounded-full bg-purple-400/10 blur-3xl" />
+    <section className="relative overflow-hidden pt-28 pb-24 sm:pt-36 sm:pb-32">
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      <div className="absolute top-[-20%] right-[-10%] -z-10 h-[500px] w-[500px] rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="absolute bottom-[-20%] left-[-10%] -z-10 h-[500px] w-[500px] rounded-full bg-purple-500/5 blur-3xl" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700">
-            <Sparkles className="h-4 w-4" />
-            AI-Powered Chatbot Builder
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 animate-fade-in">
+            <Sparkles className="h-4 w-4" /> AI-Powered Chatbot Builder
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+
+          <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl leading-[1.1]">
             Build Intelligent Chatbots with{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text text-transparent">
               Drag & Drop
             </span>
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
-            Create powerful AI chatbots without coding. Design conversational flows visually,
-            customize responses, and embed them on your website in minutes.
+
+          <p className="mt-6 text-lg sm:text-xl leading-relaxed text-gray-500 max-w-2xl mx-auto">
+            Create powerful AI chatbots in minutes — no coding required. Design conversational flows visually,
+            customize every detail, and embed on your website with one line of code.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Button asChild size="lg" className="gap-2">
-              <Link href="/register">
-                Start Building Free <ArrowRight className="h-4 w-4" />
-              </Link>
+
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button asChild size="lg" className="gap-2 h-12 px-8 text-base shadow-lg shadow-blue-200 hover:shadow-xl transition-shadow">
+              <Link href="/register">Start Building Free <ArrowRight className="h-5 w-5" /></Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="#features">See Features</Link>
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
+              <Link href="#features">See How It Works</Link>
             </Button>
           </div>
-          <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-blue-600" />
-              <span>No coding required</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-blue-600" />
-              <span>AI-powered responses</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-blue-600" />
-              <span>Easy embed</span>
-            </div>
+
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
+            {[
+              { icon: CheckCircle, text: "No coding" },
+              { icon: Zap, text: "AI-powered" },
+              { icon: Bot, text: "One-click embed" },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-2">
+                <item.icon className="h-4 w-4 text-blue-500" />
+                <span>{item.text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

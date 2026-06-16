@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
@@ -27,6 +28,7 @@ export function Navbar() {
           <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
             Sign in
           </Link>
+          <ThemeToggle />
           <Button asChild>
             <Link href="/register">Get Started Free</Link>
           </Button>

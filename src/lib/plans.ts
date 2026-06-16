@@ -1,5 +1,12 @@
 import { prisma } from "./prisma"
-import { PLANS, type PlanKey } from "./stripe"
+
+async function getPlanLimitsFromDb(planKey: string) {
+  const plan = await prisma.plan.findUnique({ where: { key: planKey } })
+  if (plan) {
+    return { chatbots: plan.chatbots, nodes: plan.nodes, chats: plan.chats, name: plan.name, price: plan.price }
+  }
+  return { chatbots: 1, nodes: 10, chats: 100, name: "Free", price: 0 }
+}
 
 export async function getPlanLimits(userId: string) {
   const subscription = await prisma.subscription.findFirst({
@@ -7,8 +14,8 @@ export async function getPlanLimits(userId: string) {
     orderBy: { createdAt: "desc" },
   })
 
-  const plan = (subscription?.plan as PlanKey) || "free"
-  return PLANS[plan]
+  const planKey = (subscription?.status === "active" ? subscription?.plan : "free") || "free"
+  return getPlanLimitsFromDb(planKey)
 }
 
 export async function getUsage(userId: string) {
@@ -66,7 +73,7 @@ export async function checkChatLimit(userId: string): Promise<{ allowed: boolean
   return { allowed: true }
 }
 
-export async function getCurrentPlan(userId: string): Promise<{ plan: string; limits: { chatbots: number; nodes: number; chats: number } }> {
+export async function getCurrentPlan(userId: string) {
   const limits = await getPlanLimits(userId)
   const subscription = await prisma.subscription.findFirst({
     where: { userId },

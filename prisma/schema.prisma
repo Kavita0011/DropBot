@@ -13,6 +13,7 @@ model User {
   email         String   @unique
   password      String?
   image         String?
+  role          String   @default("user")
   stripeCustomerId String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -72,7 +73,7 @@ model Chatbot {
   bgColor     String   @default("#ffffff")
   textColor   String   @default("#1f2937")
   flowData    String   @default("[]")
-  published   Boolean  @default(false)
+  status      String   @default("draft")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -123,11 +124,53 @@ model ChatSession {
   id        String   @id @default(cuid())
   chatbotId String
   userId    String?
-  messages  Int      @default(0)
   ended     Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chatbot Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
-  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chatbot  Chatbot   @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@index([chatbotId, createdAt])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  sessionId   String
+  role        String
+  content     String
+  createdAt   DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model PlatformSettings {
+  id              String @id @default("platform")
+  stripeAccountId String?
+  paypalEmail     String?
+  bankName        String?
+  bankAccount     String?
+  payoutSchedule  String @default("monthly")
+  updatedAt       DateTime @updatedAt
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  key         String   @unique
+  description String   @default("")
+  price       Int
+  currency    String   @default("usd")
+  priceId     String?
+  chatbots    Int      @default(1)
+  nodes       Int      @default(10)
+  chats       Int      @default(100)
+  features    String   @default("[]")
+  popular     Boolean  @default(false)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

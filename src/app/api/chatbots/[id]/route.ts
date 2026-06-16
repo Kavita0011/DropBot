@@ -49,7 +49,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       bgColor: body.bgColor,
       textColor: body.textColor,
       flowData: body.flowData,
-      published: body.published !== undefined ? body.published : chatbot.published,
+      status: body.status !== undefined ? body.status : chatbot.status,
     },
   })
 

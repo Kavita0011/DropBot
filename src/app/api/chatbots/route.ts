@@ -9,9 +9,12 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const isAdmin = (session.user as { role?: string }).role === "admin"
+
   const chatbots = await prisma.chatbot.findMany({
-    where: { userId: session.user.id },
+    where: isAdmin ? {} : { userId: session.user.id },
     orderBy: { updatedAt: "desc" },
+    include: isAdmin ? { user: { select: { id: true, name: true, email: true } } } : undefined,
   })
 
   return NextResponse.json(chatbots)

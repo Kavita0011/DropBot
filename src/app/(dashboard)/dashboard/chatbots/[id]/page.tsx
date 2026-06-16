@@ -23,7 +23,7 @@ export default function ChatbotEditorPage() {
         store.loadFromFlowData(data.flowData, {
           name: data.name, description: data.description, welcomeMsg: data.welcomeMsg,
           themeColor: data.themeColor, accentColor: data.accentColor, position: data.position,
-          bgColor: data.bgColor, textColor: data.textColor, published: data.published,
+          bgColor: data.bgColor, textColor: data.textColor, status: data.status,
         })
       })
       .catch(() => { toast.error("Chatbot not found"); router.push("/dashboard/chatbots") })

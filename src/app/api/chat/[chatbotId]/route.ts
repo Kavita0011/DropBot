@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
     const { message, history = [] } = await req.json()
 
     const chatbot = await prisma.chatbot.findFirst({
-      where: { id: chatbotId, published: true },
+      where: { id: chatbotId, status: "approved" },
     })
 
     if (!chatbot) {
@@ -23,24 +23,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
     }
 
     const flowData = JSON.parse(chatbot.flowData)
-
     const reply = await generateChatReply(chatbotId, message, history, flowData)
 
-    await prisma.chatSession.upsert({
-      where: { id: `${chatbotId}_${new Date().toISOString().split("T")[0]}` },
-      update: { messages: { increment: 1 } },
-      create: {
-        id: `${chatbotId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        chatbotId,
-        userId,
-        messages: 1,
-      },
+    const dateStr = new Date().toISOString().split("T")[0]
+    let session = await prisma.chatSession.findFirst({
+      where: { chatbotId, createdAt: { gte: new Date(dateStr) }, userId },
     })
 
-    return NextResponse.json({
-      reply: reply.reply,
-      nodeId: reply.nodeId,
+    if (!session) {
+      session = await prisma.chatSession.create({
+        data: { chatbotId, userId: userId },
+      })
+    }
+
+    await prisma.message.createMany({
+      data: [
+        { sessionId: session.id, role: "user", content: message },
+        { sessionId: session.id, role: "bot", content: reply.reply },
+      ],
     })
+
+    return NextResponse.json({ reply: reply.reply, nodeId: reply.nodeId })
   } catch {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }

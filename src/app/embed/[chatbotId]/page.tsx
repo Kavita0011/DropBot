@@ -12,7 +12,7 @@ interface ChatbotData {
   bgColor: string
   textColor: string
   position: string
-  published: boolean
+  status: string
 }
 
 export default function EmbedPage() {
@@ -29,7 +29,7 @@ export default function EmbedPage() {
       .then((res) => res.json())
       .then((data) => {
         setChatbot(data)
-        if (data.published) {
+        if (data.status === "approved") {
           setMessages([{ role: "bot", text: data.welcomeMsg }])
         }
       })

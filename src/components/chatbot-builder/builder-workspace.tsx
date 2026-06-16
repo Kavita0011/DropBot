@@ -8,6 +8,7 @@ import { NodePalette } from "./node-palette"
 import { NodeEditor } from "./node-editor"
 import { ChatPreview } from "./chat-preview"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Save, Eye, ArrowLeft, Palette, Play } from "lucide-react"
@@ -35,7 +36,7 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
       body: JSON.stringify({
         name: store.name, description: store.description, welcomeMsg: store.welcomeMsg,
         themeColor: store.themeColor, accentColor: store.accentColor, position: store.position,
-        bgColor: store.bgColor, textColor: store.textColor, flowData,
+        bgColor: store.bgColor, textColor: store.textColor, flowData, status: store.status,
       }),
     })
     if (res.ok) toast.success("Saved!"); else toast.error("Failed to save")
@@ -74,9 +75,22 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
           <Input value={store.name} onChange={(e) => store.setName(e.target.value)} className="h-8 w-48 border-0 bg-transparent text-base font-semibold focus:border focus:border-gray-300 focus:bg-white" />
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => store.setPublished(!store.published)}>
-            {store.published ? "Unpublish" : "Publish"}
-          </Button>
+          {store.status === "draft" && (
+            <Button variant="outline" size="sm" onClick={() => store.setStatus("pending_review")}>
+              Submit for Review
+            </Button>
+          )}
+          {store.status === "pending_review" && (
+            <Badge variant="warning">Under Review</Badge>
+          )}
+          {store.status === "approved" && (
+            <Badge variant="success">Approved</Badge>
+          )}
+          {store.status === "rejected" && (
+            <Button variant="outline" size="sm" onClick={() => store.setStatus("draft")}>
+              Resubmit
+            </Button>
+          )}
           <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1">
             <Save className="h-4 w-4" />{saving ? "Saving..." : "Save"}
           </Button>

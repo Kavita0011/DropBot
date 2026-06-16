@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Bot, Edit, Eye, ExternalLink, Trash2 } from "lucide-react"
+import { Bot, Edit, Eye, ExternalLink, Trash2, BarChart3 } from "lucide-react"
 import type { ChatbotData } from "@/types"
 import toast from "react-hot-toast"
 
@@ -42,8 +42,8 @@ export function ChatbotCard({ chatbot }: ChatbotCardProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={chatbot.published ? "success" : "secondary"}>
-            {chatbot.published ? "Published" : "Draft"}
+          <Badge variant={chatbot.status === "approved" ? "success" : chatbot.status === "pending_review" ? "warning" : "secondary"}>
+            {chatbot.status === "approved" ? "Published" : chatbot.status === "pending_review" ? "Review" : "Draft"}
           </Badge>
           <button onClick={handleDelete} disabled={deleting} className="text-gray-400 hover:text-red-500 transition-colors" title="Delete">
             <Trash2 className="h-4 w-4" />
@@ -64,6 +64,9 @@ export function ChatbotCard({ chatbot }: ChatbotCardProps) {
         </Button>
         <Button asChild variant="ghost" size="sm" className="gap-1">
           <Link href={`/embed/${chatbot.id}`} target="_blank"><ExternalLink className="h-3.5 w-3.5" /></Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm" className="gap-1">
+          <Link href={`/dashboard/chatbots/${chatbot.id}/analytics`}><BarChart3 className="h-3.5 w-3.5" /></Link>
         </Button>
       </CardFooter>
     </Card>

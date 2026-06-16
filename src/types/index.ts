@@ -30,7 +30,7 @@ export interface ChatbotData {
   bgColor: string;
   textColor: string;
   flowData: string;
-  published: boolean;
+  status: string;
   createdAt: string;
   updatedAt: string;
 }

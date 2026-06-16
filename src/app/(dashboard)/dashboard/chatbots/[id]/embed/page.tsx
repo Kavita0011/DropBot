@@ -12,7 +12,7 @@ export default function EmbedPage() {
   const id = params.id as string
   const [copied, setCopied] = useState(false)
   const origin = typeof window !== "undefined" ? window.location.origin : ""
-  const embedCode = `<script src="${origin}/embed/${id}/widget.js"></script>`
+  const embedCode = `<script src="${origin}/embed/${id}/widget"></script>`
   const iframeCode = `<iframe src="${origin}/embed/${id}" width="100%" height="600" frameborder="0"></iframe>`
 
   const copy = (text: string) => {

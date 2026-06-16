@@ -9,6 +9,9 @@ export async function GET() {
   }
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  if (user?.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
   const allUsers = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
