@@ -4,16 +4,14 @@
 
 ```bash
 npm install
-npm run seed    # creates admin + demo users + default plans
-npm run dev     # starts at http://localhost:3000
+cp .env.example .env   # fill in your values
+npm run seed           # creates admin + demo users + default plans
+npm run dev            # starts at http://localhost:3000
 ```
 
-## Test Credentials
+## First Run
 
-| Role  | Email                     | Password     |
-|-------|---------------------------|--------------|
-| Admin | devappkavita@gmail.com    | password123  |
-| Demo  | demo@dropbot.ai           | password123  |
+After seeding, log in at `/login` with the credentials printed in your terminal.
 
 - **Admin** has access to `/dashboard/admin` — user management, moderation, pricing editor, earnings
 - **Demo** has a pre-built "Support Bot" ready to test embedding and chat
@@ -24,11 +22,9 @@ Copy `.env.example` to `.env` and fill values for features you need:
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `DATABASE_URL` | Yes | SQLite path (default works) |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
 | `AUTH_SECRET` | Yes | Generate via `npx auth secret` |
 | `AUTH_URL` | Yes | Local: `http://localhost:3000` |
-| `GOOGLE_CLIENT_ID` | No | Google OAuth — [get here](https://console.cloud.google.com/apis/credentials) |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth |
 | `OPENAI_API_KEY` | No | AI chatbot replies — [get here](https://platform.openai.com/api-keys) |
 | `STRIPE_SECRET_KEY` | No | Payments — [get here](https://dashboard.stripe.com/test/apikeys) |
 | `STRIPE_PRO_PRICE_ID` | No | Stripe price ID for Pro plan |
@@ -44,7 +40,6 @@ Copy `.env.example` to `.env` and fill values for features you need:
 
 ### Auth
 - Email/password login and registration
-- Google OAuth (if configured)
 - Role-based access: `admin` and `user`
 
 ### Dashboard
@@ -99,12 +94,7 @@ Toggle in navbar (landing) or sidebar (dashboard). Persisted in localStorage.
    ```
 
 2. Import repo on [Vercel](https://vercel.com/new)
-3. Set environment variables in Vercel dashboard:
-   ```
-   AUTH_SECRET=5c5a907432cc3d7258a6bf15c79d2435744b0dec1642e2613ee2cd84b606d2eb
-   NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
-   AUTH_URL=https://your-domain.vercel.app
-   ```
+3. Set environment variables in Vercel dashboard (see table above — at minimum `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`, `NEXT_PUBLIC_APP_URL`)
 4. Vercel will auto-deploy on every push to main
 
 ## Tech Stack
@@ -112,7 +102,7 @@ Toggle in navbar (landing) or sidebar (dashboard). Persisted in localStorage.
 - Next.js 16.2.9 (App Router, Turbopack)
 - React 19, TypeScript
 - Tailwind CSS v4
-- Prisma + SQLite (swap to Postgres for production)
+- Prisma + PostgreSQL (Neon for serverless)
 - NextAuth v5
 - Zustand (state management)
 - Recharts (admin charts)

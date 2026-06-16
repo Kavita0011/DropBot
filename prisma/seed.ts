@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function main() {
-  const password = await bcrypt.hash("password123", 12)
+  const seedPassword = process.env.SEED_PASSWORD || "password123"
+  const password = await bcrypt.hash(seedPassword, 12)
 
   const admin = await prisma.user.upsert({
     where: { email: "devappkavita@gmail.com" },
@@ -72,9 +73,7 @@ async function main() {
     })
   }
 
-  console.log("Seeded:")
-  console.log("  Admin: devappkavita@gmail.com / password123")
-  console.log("  Demo:  demo@dropbot.ai / password123")
+  console.log("Seeded: admin user, demo user, and default plans")
 
   const plans = [
     { key: "free", name: "Free", price: 0, chatbots: 1, nodes: 10, chats: 100, features: JSON.stringify(["1 chatbot", "10 nodes", "100 chats/month"]), popular: false },
