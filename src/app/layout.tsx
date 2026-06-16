@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "DropBot",
     title: "DropBot - AI Chatbot Builder",
     description: "Build intelligent chatbots with drag & drop. No coding required.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.svg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
@@ -49,6 +49,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: "/icon-192.svg", type: "image/svg+xml" }],
   },
+  manifest: "/manifest.webmanifest",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
