@@ -74,6 +74,7 @@ model Chatbot {
   textColor   String   @default("#1f2937")
   flowData    String   @default("[]")
   status      String   @default("draft")
+  logoUrl     String   @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -13,6 +13,7 @@ interface ChatbotData {
   textColor: string
   position: string
   status: string
+  logoUrl: string | null
 }
 
 export default function EmbedPage() {
@@ -114,7 +115,11 @@ export default function EmbedPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "white" }}>
-              <MessageSquare className="h-5 w-5" />
+              {chatbot.logoUrl ? (
+                <img src={chatbot.logoUrl} alt="" style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "contain" }} />
+              ) : (
+                <MessageSquare className="h-5 w-5" />
+              )}
               <span style={{ fontWeight: 600, fontSize: "14px" }}>{chatbot.name}</span>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "white", cursor: "pointer" }}>

@@ -50,6 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       textColor: body.textColor,
       flowData: body.flowData,
       status: body.status !== undefined ? body.status : chatbot.status,
+      logoUrl: body.logoUrl,
     },
   })
 

@@ -36,7 +36,7 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
       body: JSON.stringify({
         name: store.name, description: store.description, welcomeMsg: store.welcomeMsg,
         themeColor: store.themeColor, accentColor: store.accentColor, position: store.position,
-        bgColor: store.bgColor, textColor: store.textColor, flowData, status: store.status,
+        bgColor: store.bgColor, textColor: store.textColor, flowData, status: store.status, logoUrl: store.logoUrl,
       }),
     })
     if (res.ok) toast.success("Saved!"); else toast.error("Failed to save")
@@ -162,6 +162,10 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
                       <option value="bottom-right">Bottom Right</option>
                       <option value="bottom-left">Bottom Left</option>
                     </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Logo URL (optional)</Label>
+                    <input type="url" value={store.logoUrl} onChange={(e) => store.setLogoUrl(e.target.value)} placeholder="https://example.com/logo.png" className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>

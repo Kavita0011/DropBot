@@ -14,6 +14,7 @@ interface ChatbotStore {
   bgColor: string
   textColor: string
   status: string
+  logoUrl: string
   setNodes: (nodes: FlowNode[]) => void
   setEdges: (edges: FlowEdge[]) => void
   addNode: (node: FlowNode) => void
@@ -31,6 +32,7 @@ interface ChatbotStore {
   setBgColor: (color: string) => void
   setTextColor: (color: string) => void
   setStatus: (status: string) => void
+  setLogoUrl: (url: string) => void
   reset: () => void
   loadFromFlowData: (flowData: string, fields?: Partial<ChatbotStore>) => void
   toFlowData: () => string
@@ -58,6 +60,7 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
   bgColor: "#ffffff",
   textColor: "#1f2937",
   status: "draft",
+  logoUrl: "",
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
   addNode: (node) => set((s) => ({ nodes: [...s.nodes, node] })),
@@ -84,6 +87,7 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
   setBgColor: (color) => set({ bgColor: color }),
   setTextColor: (color) => set({ textColor: color }),
   setStatus: (status) => set({ status }),
+  setLogoUrl: (logoUrl) => set({ logoUrl }),
   reset: () =>
     set({
       nodes: initialNodes,
@@ -98,6 +102,7 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
       bgColor: "#ffffff",
       textColor: "#1f2937",
       status: "draft",
+      logoUrl: "",
     }),
   loadFromFlowData: (flowData, fields) => {
     const parsed = JSON.parse(flowData)

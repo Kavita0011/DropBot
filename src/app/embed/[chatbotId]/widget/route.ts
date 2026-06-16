@@ -6,7 +6,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chatbotI
 
   const chatbot = await prisma.chatbot.findFirst({
     where: { id: chatbotId, status: "approved" },
-    select: { id: true, name: true, welcomeMsg: true, themeColor: true, bgColor: true, textColor: true, position: true },
+    select: { id: true, name: true, welcomeMsg: true, themeColor: true, bgColor: true, textColor: true, position: true, logoUrl: true },
   })
 
   if (!chatbot) {
@@ -27,6 +27,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chatbotI
     textColor: chatbot.textColor,
     position: chatbot.position,
     apiUrl: origin + "/api/chat/" + chatbot.id,
+    logoUrl: '${chatbot.logoUrl || ""}',
   })};
 
   var container = document.createElement("div");
@@ -80,7 +81,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chatbotI
       '<div class="db-widget" style="background:' + config.bgColor + '">' +
       '<div class="db-header" style="background:' + config.themeColor + '">' +
       '<div style="display:flex;align-items:center;gap:8px">' +
-      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+      (config.logoUrl ? '<img src="'+config.logoUrl+'" style="width:24px;height:24px;border-radius:4px;object-fit:contain" />' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>') +
       '<span style="font-weight:600;font-size:14px">' + config.name + '</span></div>' +
       '<button id="dbClose" style="background:none;border:none;color:white;cursor:pointer">' +
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
