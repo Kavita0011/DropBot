@@ -89,7 +89,21 @@ async function main() {
     })
   }
 
+  await prisma.platformSettings.upsert({
+    where: { id: "platform" },
+    update: {},
+    create: {
+      id: "platform",
+      upiId: "devappkavita@gmail.com",
+      bankDisplayName: "HDFC Bank",
+      bankAccountNumber: "1234567890123456",
+      bankIfsc: "HDFC0001234",
+      bankAccountHolder: "Kavita",
+    },
+  })
+
   console.log("  Plans: Free, Pro, Business")
+  console.log("  Platform settings: UPI + Bank configured")
 }
 
 main()

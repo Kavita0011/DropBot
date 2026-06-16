@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import {
   Users, Bot, CreditCard, TrendingUp, ShieldCheck, ShieldX, Search, Loader2,
   LayoutDashboard, UserCog, MessageSquare, DollarSign, CheckCircle, XCircle,
-  Clock, ArrowUpDown, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Tag
+  Clock, ArrowUpDown, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Tag, Settings, Smartphone, Landmark
 } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Legend } from "recharts"
 import toast from "react-hot-toast"
@@ -23,6 +23,7 @@ const TABS = [
   { key: "moderation", label: "Moderation", icon: ShieldCheck },
   { key: "pricing", label: "Pricing", icon: Tag },
   { key: "transactions", label: "Payments", icon: DollarSign },
+  { key: "paymentsettings", label: "Payment Settings", icon: Settings },
 ] as const
 
 interface AdminStats {
@@ -66,6 +67,8 @@ export default function AdminPage() {
   const [plans, setPlans] = useState<any[]>([])
   const [editingPlan, setEditingPlan] = useState<any | null>(null)
   const [showPlanForm, setShowPlanForm] = useState(false)
+  const [paySettings, setPaySettings] = useState({ upiId: "", bankDisplayName: "", bankAccountNumber: "", bankIfsc: "", bankAccountHolder: "" })
+  const [savingSettings, setSavingSettings] = useState(false)
 
   const isAdmin = (session?.user as { role?: string })?.role === "admin"
 
@@ -80,7 +83,8 @@ export default function AdminPage() {
       fetch("/api/chatbots").then((r) => r.json()),
       fetch("/api/admin/moderation").then((r) => r.json()),
       fetch("/api/admin/plans").then((r) => r.json()),
-    ]).then(([s, u, c, p, pl]) => { setStats(s); setUsers(u); setChatbots(c); setPending(p); setPlans(pl) })
+      fetch("/api/admin/settings").then((r) => r.json()),
+    ]).then(([s, u, c, p, pl, ps]) => { setStats(s); setUsers(u); setChatbots(c); setPending(p); setPlans(pl); if (ps?.upiId || ps?.bankAccountNumber) setPaySettings(ps) })
       .catch(() => toast.error("Failed to load admin data"))
       .finally(() => setLoading(false))
   }, [status, isAdmin])
@@ -129,6 +133,18 @@ export default function AdminPage() {
     } else {
       toast.error("Failed to save plan")
     }
+  }
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true)
+    const res = await fetch("/api/admin/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(paySettings),
+    })
+    if (res.ok) toast.success("Payment settings saved!")
+    else toast.error("Failed to save settings")
+    setSavingSettings(false)
   }
 
   const handleDeletePlan = async (id: string) => {
@@ -579,6 +595,34 @@ export default function AdminPage() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {tab === "paymentsettings" && (
+        <div className="space-y-6">
+          <div><h2 className="text-lg font-semibold">Payment Settings</h2><p className="text-sm text-gray-500 mt-1">Configure UPI ID and bank transfer details shown to users.</p></div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Smartphone className="h-4 w-4 text-purple-600" /> UPI</CardTitle></CardHeader>
+              <CardContent>
+                <label className="text-xs font-medium text-gray-500">UPI ID</label>
+                <Input value={paySettings.upiId} onChange={(e) => setPaySettings({ ...paySettings, upiId: e.target.value })} className="mt-1 h-9" placeholder="example@upi" />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Landmark className="h-4 w-4 text-blue-600" /> Bank Transfer</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <div><label className="text-xs font-medium text-gray-500">Account Holder Name</label><Input value={paySettings.bankAccountHolder} onChange={(e) => setPaySettings({ ...paySettings, bankAccountHolder: e.target.value })} className="mt-1 h-9" /></div>
+                <div><label className="text-xs font-medium text-gray-500">Bank Name</label><Input value={paySettings.bankDisplayName} onChange={(e) => setPaySettings({ ...paySettings, bankDisplayName: e.target.value })} className="mt-1 h-9" placeholder="e.g. HDFC Bank" /></div>
+                <div><label className="text-xs font-medium text-gray-500">Account Number</label><Input value={paySettings.bankAccountNumber} onChange={(e) => setPaySettings({ ...paySettings, bankAccountNumber: e.target.value })} className="mt-1 h-9" /></div>
+                <div><label className="text-xs font-medium text-gray-500">IFSC Code</label><Input value={paySettings.bankIfsc} onChange={(e) => setPaySettings({ ...paySettings, bankIfsc: e.target.value })} className="mt-1 h-9" /></div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Button onClick={handleSaveSettings} disabled={savingSettings}>{savingSettings ? "Saving..." : "Save Payment Settings"}</Button>
+        </div>
       )}
     </div>
   )

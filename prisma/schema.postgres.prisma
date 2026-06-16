@@ -149,13 +149,18 @@ model Message {
 }
 
 model PlatformSettings {
-  id              String @id @default("platform")
-  stripeAccountId String?
-  paypalEmail     String?
-  bankName        String?
-  bankAccount     String?
-  payoutSchedule  String @default("monthly")
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default("platform")
+  stripeAccountId   String?
+  paypalEmail       String?
+  bankName          String?
+  bankAccount       String?
+  payoutSchedule    String   @default("monthly")
+  upiId             String?
+  bankDisplayName   String?
+  bankAccountNumber String?
+  bankIfsc          String?
+  bankAccountHolder String?
+  updatedAt         DateTime @updatedAt
 }
 
 model Plan {

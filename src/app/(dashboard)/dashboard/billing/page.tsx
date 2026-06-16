@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, CreditCard, ExternalLink, Loader2 } from "lucide-react"
+import { Check, CreditCard, ExternalLink, Loader2, Smartphone, Landmark, Copy } from "lucide-react"
 import toast from "react-hot-toast"
 
 interface Plan {
@@ -17,9 +17,18 @@ interface BillingData {
   payments: any[]
 }
 
+interface PaymentSettings {
+  upiId: string | null
+  bankDisplayName: string | null
+  bankAccountNumber: string | null
+  bankIfsc: string | null
+  bankAccountHolder: string | null
+}
+
 export default function BillingPage() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [billing, setBilling] = useState<BillingData | null>(null)
+  const [paySettings, setPaySettings] = useState<PaymentSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [upgrading, setUpgrading] = useState<string | null>(null)
 
@@ -27,7 +36,8 @@ export default function BillingPage() {
     Promise.all([
       fetch("/api/plans").then((r) => r.json()),
       fetch("/api/billing/plan").then((r) => r.json()),
-    ]).then(([p, b]) => { setPlans(p); setBilling(b) }).finally(() => setLoading(false))
+      fetch("/api/payment-settings").then((r) => r.json()),
+    ]).then(([p, b, s]) => { setPlans(p); setBilling(b); setPaySettings(s) }).finally(() => setLoading(false))
   }, [])
 
   const handleUpgrade = async (priceId: string) => {
@@ -58,9 +68,14 @@ export default function BillingPage() {
     }
   }
 
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => toast.success(`${label} copied!`)).catch(() => toast.error("Failed to copy"))
+  }
+
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
 
   const currentKey = billing?.currentPlan?.key || "free"
+  const hasManualPayment = paySettings?.upiId || (paySettings?.bankAccountNumber && paySettings?.bankIfsc)
 
   return (
     <div className="space-y-6">
@@ -122,6 +137,69 @@ export default function BillingPage() {
           )
         })}
       </div>
+
+      {hasManualPayment && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Pay via Bank Transfer / UPI</CardTitle>
+            <CardDescription>Send payment and email us at devappkavita@gmail.com with the transaction ID to activate your subscription.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {paySettings?.upiId && (
+                <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Smartphone className="h-5 w-5 text-purple-600" />
+                    <h3 className="font-semibold text-purple-900">UPI</h3>
+                  </div>
+                  <div className="flex items-center justify-between bg-white rounded-md px-3 py-2 border border-purple-100">
+                    <span className="text-sm font-mono text-gray-800">{paySettings.upiId}</span>
+                    <button onClick={() => copyToClipboard(paySettings.upiId!, "UPI ID")} className="text-purple-600 hover:text-purple-800">
+                      <Copy className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {paySettings?.bankAccountNumber && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Landmark className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">Bank Transfer</h3>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {paySettings.bankAccountHolder && (
+                      <div className="flex justify-between"><span className="text-gray-500">Account Holder</span><span className="font-medium">{paySettings.bankAccountHolder}</span></div>
+                    )}
+                    {paySettings.bankDisplayName && (
+                      <div className="flex justify-between"><span className="text-gray-500">Bank</span><span className="font-medium">{paySettings.bankDisplayName}</span></div>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Account Number</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium font-mono">{paySettings.bankAccountNumber}</span>
+                        <button onClick={() => copyToClipboard(paySettings.bankAccountNumber!, "Account number")} className="text-blue-600 hover:text-blue-800">
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    {paySettings.bankIfsc && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">IFSC</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium font-mono">{paySettings.bankIfsc}</span>
+                          <button onClick={() => copyToClipboard(paySettings.bankIfsc!, "IFSC")} className="text-blue-600 hover:text-blue-800">
+                            <Copy className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {billing?.payments && billing.payments.length > 0 && (
         <Card>
