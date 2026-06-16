@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  password      String?
+  image         String?
+  role          String   @default("user")
+  stripeCustomerId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  chatbots      Chatbot[]
+  subscriptions Subscription[]
+  payments      Payment[]
+  accounts      Account[]
+  sessions      Session[]
+  chatSessions  ChatSession[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Chatbot {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String   @default("")
+  welcomeMsg  String   @default("Hello! How can I help you?")
+  themeColor  String   @default("#3b82f6")
+  accentColor String   @default("#1d4ed8")
+  position    String   @default("bottom-right")
+  bgColor     String   @default("#ffffff")
+  textColor   String   @default("#1f2937")
+  flowData    String   @default("[]")
+  status      String   @default("draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes  ChatbotNode[]
+  sessions ChatSession[]
+}
+
+model ChatbotNode {
+  id        String  @id @default(cuid())
+  chatbotId String
+  type      String
+  label     String  @default("")
+  data      String  @default("{}")
+  posX      Float   @default(0)
+  posY      Float   @default(0)
+
+  chatbot Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  status               String   @default("inactive")
+  currentPeriodEnd     DateTime?
+  plan                 String   @default("free")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  amount          Int
+  currency        String   @default("usd")
+  stripePaymentId String?
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  chatbotId String
+  userId    String?
+  ended     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatbot  Chatbot   @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@index([chatbotId, createdAt])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  sessionId   String
+  role        String
+  content     String
+  createdAt   DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model PlatformSettings {
+  id              String @id @default("platform")
+  stripeAccountId String?
+  paypalEmail     String?
+  bankName        String?
+  bankAccount     String?
+  payoutSchedule  String @default("monthly")
+  updatedAt       DateTime @updatedAt
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  key         String   @unique
+  description String   @default("")
+  price       Int
+  currency    String   @default("usd")
+  priceId     String?
+  chatbots    Int      @default(1)
+  nodes       Int      @default(10)
+  chats       Int      @default(100)
+  features    String   @default("[]")
+  popular     Boolean  @default(false)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

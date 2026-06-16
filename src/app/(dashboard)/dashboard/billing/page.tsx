@@ -87,7 +87,8 @@ export default function BillingPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {plans.map((plan) => {
           const isCurrent = currentKey === plan.key
-          const features = JSON.parse(plan.features) as string[]
+          let features: string[] = []
+          try { features = JSON.parse(plan.features) } catch { features = [] }
           return (
             <Card key={plan.id} className={`flex flex-col relative ${isCurrent ? "border-blue-500 ring-1 ring-blue-500" : ""} ${plan.popular && !isCurrent ? "border-blue-300" : ""}`}>
               {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded-full">Most Popular</div>}

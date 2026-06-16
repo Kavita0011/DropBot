@@ -14,6 +14,9 @@ export async function POST(req: Request) {
   }
 
   const { priceId } = await req.json()
+  if (!priceId) {
+    return NextResponse.json({ error: "Missing priceId" }, { status: 400 })
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -26,25 +29,35 @@ export async function POST(req: Request) {
   let customerId = user.stripeCustomerId
 
   if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email!,
-      name: user.name || undefined,
-      metadata: { userId: user.id },
-    })
-    customerId = customer.id
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { stripeCustomerId: customerId },
-    })
+    try {
+      const customer = await stripe.customers.create({
+        email: user.email || undefined,
+        name: user.name || undefined,
+        metadata: { userId: user.id },
+      })
+      customerId = customer.id
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { stripeCustomerId: customerId },
+      })
+    } catch {
+      return NextResponse.json({ error: "Failed to create customer" }, { status: 500 })
+    }
   }
 
-  const checkoutSession = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?canceled=true`,
-  })
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
-  return NextResponse.json({ url: checkoutSession.url })
+  try {
+    const checkoutSession = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: "subscription",
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: { priceId },
+      success_url: `${appUrl}/dashboard/billing?success=true`,
+      cancel_url: `${appUrl}/dashboard/billing?canceled=true`,
+    })
+    return NextResponse.json({ url: checkoutSession.url })
+  } catch {
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
+  }
 }

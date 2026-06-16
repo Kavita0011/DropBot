@@ -4,10 +4,24 @@
 
 ```bash
 npm install
-cp .env.example .env   # fill in your values
-npm run seed           # creates admin + demo users + default plans
-npm run dev            # starts at http://localhost:3000
+npm run seed        # creates admin + demo users + default plans
+npm run dev         # starts at http://localhost:3001
 ```
+
+## Deploy to Vercel (with Neon PostgreSQL)
+
+1. Push to GitHub normally
+2. On Vercel, set **Build Command** to (replaces SQLite schema with PostgreSQL):
+   ```
+   npx prisma generate && npx prisma db push --accept-data-loss && next build
+   ```
+3. Set environment variables:
+   ```
+   DATABASE_URL=<your-neon-connection-string>
+   AUTH_SECRET=<generated-secret>
+   AUTH_URL=https://your-domain.vercel.app
+   NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+   ```
 
 ## First Run
 
@@ -22,7 +36,7 @@ Copy `.env.example` to `.env` and fill values for features you need:
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `DATABASE_URL` | Yes | SQLite for local (`file:./dev.db`); PostgreSQL for production |
 | `AUTH_SECRET` | Yes | Generate via `npx auth secret` |
 | `AUTH_URL` | Yes | Local: `http://localhost:3000` |
 | `OPENAI_API_KEY` | No | AI chatbot replies — [get here](https://platform.openai.com/api-keys) |

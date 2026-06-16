@@ -4,10 +4,16 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json()
+    let { name, email, password } = await req.json()
 
     if (!email || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+    }
+
+    email = String(email).trim().toLowerCase().replace(/[<>]/g, "")
+    name = String(name || "").trim().replace(/[<>]/g, "")
+    if (password.length < 6) {
+      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
     }
 
     const existing = await prisma.user.findUnique({ where: { email } })
@@ -34,7 +40,8 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 })
-  } catch {
+  } catch (e) {
+    console.error("Register error:", e)
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
 }
