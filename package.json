@@ -9,7 +9,7 @@
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
     "db:push": "npx prisma db push --accept-data-loss",
-    "vercel-build": "node -e \"require('fs').copyFileSync('prisma/schema.postgres.prisma','prisma/schema.prisma')\" && npx prisma generate && npx prisma db push --accept-data-loss && next build",
+    "vercel-build": "node -e \"require('fs').copyFileSync('prisma/schema.postgres.prisma','prisma/schema.prisma')\" && npx prisma generate && npx prisma db push --accept-data-loss && npm run seed && next build",
     "postinstall": "npx prisma generate"
   },
   "prisma": {
