@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, useSensor, MouseSensor, TouchSensor } from "@dnd-kit/core"
 import { useChatbotStore } from "@/store/chatbot-store"
 import { BuilderCanvas } from "./builder-canvas"
@@ -11,10 +11,18 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Save, Eye, ArrowLeft, Palette, Play } from "lucide-react"
+import { Save, Eye, ArrowLeft, Palette, Play, Undo2, Redo2, Trash2 } from "lucide-react"
 import { generateId } from "@/lib/utils"
 import toast from "react-hot-toast"
 import type { FlowNode } from "@/types"
+
+const SNAP = 20
+function snapToGrid(val: number): number { return Math.round(val / SNAP) * SNAP }
+function getNextPosition(nodes: FlowNode[]): { x: number; y: number } {
+  if (nodes.length === 0) return { x: 300, y: 50 }
+  const maxY = Math.max(...nodes.map((n) => n.position.y))
+  return { x: 300, y: maxY + 180 }
+}
 
 type Tab = "builder" | "settings" | "preview"
 
@@ -26,6 +34,23 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
   const store = useChatbotStore()
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 8 } })
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA" || (e.target as HTMLElement).tagName === "SELECT") return
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (store.selectedNodeId) { store.removeNode(store.selectedNodeId); return }
+        if (store.selectedEdgeId) { store.removeEdge(store.selectedEdgeId); return }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault()
+        if (e.shiftKey) store.redo()
+        else store.undo()
+      }
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [store])
 
   const handleSave = useCallback(async () => {
     setSaving(true)
@@ -49,13 +74,14 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveDrag(null)
-    const { active, over } = event
-    if (!over || over.id !== "canvas") return
-    const data = active.data.current
-    if (data?.fromPalette) {
+    const { active, over, delta } = event
+    if (active.data.current?.fromPalette) {
+      if (!over || over.id !== "canvas") return
+      const data = active.data.current
+      const pos = getNextPosition(store.nodes)
       const newNode: FlowNode = {
         id: generateId(), type: data.type,
-        position: { x: Math.random() * 400 + 50, y: Math.random() * 300 + 50 },
+        position: { x: snapToGrid(pos.x), y: snapToGrid(pos.y) },
         data: data.type === "welcome" ? { message: "Hello! How can I help?" }
           : data.type === "message" ? { message: "Your message here" }
           : data.type === "options" ? { question: "Choose an option:", choices: ["Option 1", "Option 2"] }
@@ -63,7 +89,16 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
           : data.type === "condition" ? { condition: "true" }
           : data.type === "api_call" ? { apiUrl: "", method: "GET" } : {},
       }
-      store.addNode(newNode); store.selectNode(newNode.id)
+      store.addNode(newNode)
+      store.selectNode(newNode.id)
+    } else {
+      const nodeId = active.id as string
+      const node = store.nodes.find((n) => n.id === nodeId)
+      if (node && (Math.abs(delta.x) > 2 || Math.abs(delta.y) > 2)) {
+        const newX = snapToGrid(node.position.x + delta.x)
+        const newY = snapToGrid(node.position.y + delta.y)
+        store.updateNodePosition(nodeId, newX, newY)
+      }
     }
   }
 
@@ -75,21 +110,27 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
           <Input value={store.name} onChange={(e) => store.setName(e.target.value)} className="h-8 w-48 border-0 bg-transparent text-base font-semibold focus:border focus:border-gray-300 focus:bg-white" />
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => store.undo()} disabled={store.past.length === 0} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed" title="Undo (Ctrl+Z)">
+            <Undo2 className="h-4 w-4" />
+          </button>
+          <button onClick={() => store.redo()} disabled={store.future.length === 0} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed" title="Redo (Ctrl+Shift+Z)">
+            <Redo2 className="h-4 w-4" />
+          </button>
+          <div className="w-px h-5 bg-gray-200 mx-1" />
+          {store.selectedNodeId && (
+            <button onClick={() => store.selectedNodeId && store.removeNode(store.selectedNodeId)} className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50" title="Delete node (Delete)">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
           {store.status === "draft" && (
             <Button variant="outline" size="sm" onClick={() => store.setStatus("pending_review")}>
               Submit for Review
             </Button>
           )}
-          {store.status === "pending_review" && (
-            <Badge variant="warning">Under Review</Badge>
-          )}
-          {store.status === "approved" && (
-            <Badge variant="success">Approved</Badge>
-          )}
+          {store.status === "pending_review" && <Badge variant="warning">Under Review</Badge>}
+          {store.status === "approved" && <Badge variant="success">Approved</Badge>}
           {store.status === "rejected" && (
-            <Button variant="outline" size="sm" onClick={() => store.setStatus("draft")}>
-              Resubmit
-            </Button>
+            <Button variant="outline" size="sm" onClick={() => store.setStatus("draft")}>Resubmit</Button>
           )}
           <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1">
             <Save className="h-4 w-4" />{saving ? "Saving..." : "Save"}
@@ -101,9 +142,7 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
         <div className="flex border-b bg-white">
           {(["builder", "settings", "preview"] as const).map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
             >
               {tab === "builder" ? <Eye className="h-4 w-4" /> : tab === "settings" ? <Palette className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
