@@ -26,7 +26,7 @@ export default function EmbedPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/chatbots/${chatbotId}`)
+    fetch(`/api/embed/${chatbotId}`)
       .then((res) => res.json())
       .then((data) => {
         setChatbot(data)
