@@ -1,11 +1,14 @@
-const Razorpay = require("razorpay")
+import Razorpay from "razorpay"
+import { createHmac } from "crypto"
 
 interface RazorpayOrderResult {
   id: string; amount: number; amount_due: number; amount_paid: number
   currency: string; receipt: string; status: string; attempts: number; created_at: number
 }
 
-function getClient() {
+type RazorpayInstance = InstanceType<typeof Razorpay>
+
+function getClient(): RazorpayInstance | null {
   const key_id = process.env.RAZORPAY_KEY_ID
   const key_secret = process.env.RAZORPAY_KEY_SECRET
   if (!key_id || !key_secret) return null
@@ -19,13 +22,12 @@ export async function createOrder(amount: number, currency: string, receipt: str
     amount: Math.round(amount),
     currency: currency.toUpperCase(),
     receipt,
-    payment_capture: 1,
+    payment_capture: true,
   })
-  return order as RazorpayOrderResult
+  return order as unknown as RazorpayOrderResult
 }
 
 export function verifyPayment(orderId: string, paymentId: string, signature: string) {
-  const { createHmac } = require("crypto") as typeof import("crypto")
   const secret = process.env.RAZORPAY_KEY_SECRET
   if (!secret) return false
   const expected = createHmac("sha256", secret).update(`${orderId}|${paymentId}`).digest("hex")
