@@ -12,8 +12,8 @@ export async function POST(req: Request) {
 
     email = String(email).trim().toLowerCase().replace(/[<>]/g, "")
     name = String(name || "").trim().replace(/[<>]/g, "")
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      return NextResponse.json({ error: "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character" }, { status: 400 })
     }
 
     const existing = await prisma.user.findUnique({ where: { email } })

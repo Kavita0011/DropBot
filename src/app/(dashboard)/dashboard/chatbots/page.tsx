@@ -3,17 +3,30 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Plus, Bot } from "lucide-react"
+import { Plus, Bot, ChevronLeft, ChevronRight } from "lucide-react"
 import { ChatbotCard } from "@/components/dashboard/chatbot-card"
 import type { ChatbotData } from "@/types"
+
+const PER_PAGE = 10
 
 export default function ChatbotsPage() {
   const [chatbots, setChatbots] = useState<ChatbotData[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
 
   useEffect(() => {
-    fetch("/api/chatbots").then((res) => res.json()).then(setChatbots).finally(() => setLoading(false))
+    fetch("/api/chatbots")
+      .then((res) => res.json())
+      .then(setChatbots)
+      .finally(() => setLoading(false))
   }, [])
+
+  const totalPages = Math.max(1, Math.ceil(chatbots.length / PER_PAGE))
+  const paginated = chatbots.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+
+  useEffect(() => {
+    setPage(0)
+  }, [chatbots.length])
 
   return (
     <div className="space-y-6">
@@ -39,9 +52,22 @@ export default function ChatbotsPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {chatbots.map((c) => <ChatbotCard key={c.id} chatbot={c} />)}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {paginated.map((c) => <ChatbotCard key={c.id} chatbot={c} />)}
+          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-gray-500">{page + 1} / {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

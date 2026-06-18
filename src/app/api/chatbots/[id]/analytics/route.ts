@@ -17,7 +17,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  const [totalSessions, todaySessions, totalMessages, recentSessions] = await Promise.all([
+  const url = new URL(req.url)
+  const exportAll = url.searchParams.get("all") === "true"
+
+  const [totalSessions, todaySessions, totalMessages, recentSessions, allSessions] = await Promise.all([
     prisma.chatSession.count({ where: { chatbotId } }),
     prisma.chatSession.count({
       where: { chatbotId, createdAt: { gte: new Date(new Date().toISOString().split("T")[0]) } },
@@ -31,6 +34,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       take: 10,
       include: { _count: { select: { messages: true } } },
     }),
+    exportAll
+      ? prisma.chatSession.findMany({
+          where: { chatbotId },
+          orderBy: { createdAt: "desc" },
+          include: { _count: { select: { messages: true } } },
+        })
+      : Promise.resolve([]),
   ])
 
   return NextResponse.json({
@@ -38,5 +48,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     todaySessions,
     totalMessages,
     recentSessions,
+    allSessions: exportAll ? allSessions : undefined,
   })
 }

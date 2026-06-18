@@ -31,7 +31,8 @@ export default function TermsPage() {
         </ul>
 
         <h2 className="text-xl font-semibold mt-8">5. Payment Terms</h2>
-        <p>Paid plans are billed in advance on a monthly basis. All payments are non-refundable except as outlined in our Refund Policy. We use Stripe for payment processing and do not store your payment details.</p>
+        <p>Paid plans are billed in advance on a monthly basis. Payments can be made via UPI or Bank Transfer (NEFT/IMPS/RTGS) for manual processing, or via Stripe for automatic processing. All payments are non-refundable except as outlined in our Refund Policy.</p>
+        <p><strong>Manual Payment Approval:</strong> Payments submitted via UPI or Bank Transfer require admin approval. Payments with amounts lesser or higher than the plan price will not be approved. No refunds or money-back will be issued once a manual payment is approved. Plan downgrades or switches can be requested via admin.</p>
 
         <h2 className="text-xl font-semibold mt-8">6. Cancellation</h2>
         <p>You may cancel your subscription at any time from the billing dashboard. Your access will continue until the end of the current billing period.</p>

@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Users, MessageCircle, ArrowLeft, Loader2 } from "lucide-react"
+import { MessageSquare, Users, MessageCircle, ArrowLeft, Loader2, Download } from "lucide-react"
+import toast from "react-hot-toast"
 import Link from "next/link"
 
 interface AnalyticsData {
@@ -38,10 +39,28 @@ export default function AnalyticsPage() {
         <Link href="/dashboard/chatbots" className="text-gray-400 hover:text-gray-600">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold">Chat Analytics</h1>
           <p className="text-sm text-gray-500 mt-1">Conversation history and metrics.</p>
         </div>
+        <Button variant="outline" size="sm" className="gap-1" onClick={async () => {
+          const res = await fetch(`/api/chatbots/${id}/analytics?all=true`)
+          const json = await res.json()
+          const sessions: any[] = json.allSessions || []
+          if (!sessions.length) { toast.error("No data to export"); return }
+          const csv = [
+            ["Session ID", "Date", "Messages"].join(","),
+            ...sessions.map((s: any) =>
+              [s.id, new Date(s.createdAt).toISOString(), s._count?.messages || 0].join(",")
+            ),
+          ].join("\n")
+          const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement("a"); a.href = url; a.download = "chat-sessions.csv"; a.click()
+          URL.revokeObjectURL(url)
+        }}>
+          <Download className="h-4 w-4" /> Export CSV
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

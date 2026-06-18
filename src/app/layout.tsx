@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "DropBot",
     title: "DropBot - AI Chatbot Builder",
     description: "Build intelligent chatbots with drag & drop. No coding required.",
-    images: [{ url: "/og-image.svg", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.svg", width: 1200, height: 630, type: "image/svg+xml" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -52,10 +52,43 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
 }
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: "DropBot",
+      url: baseUrl,
+      logo: `${baseUrl}/icon-512.svg`,
+      description: "Build intelligent AI chatbots with drag and drop. No coding required.",
+      foundingDate: "2024",
+    },
+    {
+      "@type": "WebSite",
+      url: baseUrl,
+      name: "DropBot - AI Chatbot Builder",
+      description: "Build intelligent AI chatbots with drag and drop. No coding required.",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: `${baseUrl}/search?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "DropBot",
+      operatingSystem: "Web",
+      applicationCategory: "BusinessApplication",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+  ],
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen antialiased">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Providers>{children}</Providers>
       </body>
     </html>

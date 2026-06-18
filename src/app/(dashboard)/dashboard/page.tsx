@@ -5,7 +5,8 @@ import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Bot, Plus, MessageSquare, CreditCard, TrendingUp, BarChart3 } from "lucide-react"
+import { Bot, Plus, MessageSquare, TrendingUp, BarChart3 } from "lucide-react"
+import toast from "react-hot-toast"
 
 interface DashboardStats {
   totalChatbots: number
@@ -25,7 +26,7 @@ export default function DashboardPage() {
     fetch("/api/dashboard/stats")
       .then((r) => r.json())
       .then(setStats)
-      .catch(() => {})
+      .catch(() => { toast.error("Failed to load dashboard stats") })
       .finally(() => setLoading(false))
   }, [])
 

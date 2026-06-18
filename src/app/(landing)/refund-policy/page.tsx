@@ -14,6 +14,7 @@ export default function RefundPolicyPage() {
 
         <h2 className="text-xl font-semibold mt-8">1. Subscription Payments</h2>
         <p>All subscription payments are non-refundable. If you cancel your subscription, you will continue to have access to the paid features until the end of your current billing period.</p>
+        <p><strong>Manual Payments (UPI / Bank Transfer):</strong> Payments submitted manually are subject to admin approval. Payments with amounts that do not match the plan price will not be approved. Once approved, no refunds or money-back will be provided. Please ensure you pay the exact plan amount for your chosen currency.</p>
 
         <h2 className="text-xl font-semibold mt-8">2. Free Trial</h2>
         <p>We offer a free plan that allows you to test the Service before committing to a paid subscription. We encourage you to evaluate the free plan thoroughly before upgrading.</p>

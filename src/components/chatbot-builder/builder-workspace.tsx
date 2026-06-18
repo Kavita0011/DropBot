@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Save, Eye, ArrowLeft, Palette, Play, Undo2, Redo2, Trash2 } from "lucide-react"
+import { Save, Eye, ArrowLeft, Palette, Play, Undo2, Redo2, Trash2, Copy, Scissors, ClipboardPaste } from "lucide-react"
 import { generateId } from "@/lib/utils"
 import toast from "react-hot-toast"
 import type { FlowNode } from "@/types"
@@ -37,15 +37,45 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA" || (e.target as HTMLElement).tagName === "SELECT") return
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return
+
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (store.selectedNodeId) { store.removeNode(store.selectedNodeId); return }
-        if (store.selectedEdgeId) { store.removeEdge(store.selectedEdgeId); return }
+        store.removeSelectedNodes()
+        return
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault()
         if (e.shiftKey) store.redo()
         else store.undo()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+        e.preventDefault()
+        store.copyNodes()
+        toast.success("Copied")
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        e.preventDefault()
+        store.pasteNodes()
+        toast.success("Pasted")
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "x") {
+        e.preventDefault()
+        store.copyNodes()
+        store.removeSelectedNodes()
+        toast.success("Cut")
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault()
+        const ids = store.selectedNodeIds.length > 0 ? store.selectedNodeIds : (store.selectedNodeId ? [store.selectedNodeId] : [])
+        if (ids.length === 0) return
+        ids.forEach((id) => store.duplicateNode(id))
+        toast.success("Duplicated")
+        return
       }
     }
     window.addEventListener("keydown", handler)
@@ -95,12 +125,16 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
       const nodeId = active.id as string
       const node = store.nodes.find((n) => n.id === nodeId)
       if (node && (Math.abs(delta.x) > 2 || Math.abs(delta.y) > 2)) {
-        const newX = snapToGrid(node.position.x + delta.x)
-        const newY = snapToGrid(node.position.y + delta.y)
+        const newX = store.snapToGrid ? snapToGrid(node.position.x + delta.x) : Math.round(node.position.x + delta.x)
+        const newY = store.snapToGrid ? snapToGrid(node.position.y + delta.y) : Math.round(node.position.y + delta.y)
         store.updateNodePosition(nodeId, newX, newY)
       }
     }
   }
+
+  const canDelete = store.selectedNodeIds.length > 0 || store.selectedNodeId !== null
+  const canCopy = canDelete
+  const canPaste = store.clipboard !== null && store.clipboard.length > 0
 
   return (
     <div className="flex h-[calc(100vh-3rem)] flex-col">
@@ -109,7 +143,7 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
           <button onClick={onBack} className="text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></button>
           <Input value={store.name} onChange={(e) => store.setName(e.target.value)} className="h-8 w-48 border-0 bg-transparent text-base font-semibold focus:border focus:border-gray-300 focus:bg-white" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button onClick={() => store.undo()} disabled={store.past.length === 0} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed" title="Undo (Ctrl+Z)">
             <Undo2 className="h-4 w-4" />
           </button>
@@ -117,15 +151,18 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
             <Redo2 className="h-4 w-4" />
           </button>
           <div className="w-px h-5 bg-gray-200 mx-1" />
-          {store.selectedNodeId && (
-            <button onClick={() => store.selectedNodeId && store.removeNode(store.selectedNodeId)} className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50" title="Delete node (Delete)">
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+          <button onClick={() => store.copyNodes()} disabled={!canCopy} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed" title="Copy (Ctrl+C)">
+            <Copy className="h-4 w-4" />
+          </button>
+          <button onClick={() => store.pasteNodes()} disabled={!canPaste} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed" title="Paste (Ctrl+V)">
+            <ClipboardPaste className="h-4 w-4" />
+          </button>
+          <button onClick={() => store.removeSelectedNodes()} disabled={!canDelete} className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed" title="Delete (Del)">
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <div className="w-px h-5 bg-gray-200 mx-1" />
           {store.status === "draft" && (
-            <Button variant="outline" size="sm" onClick={() => store.setStatus("pending_review")}>
-              Submit for Review
-            </Button>
+            <Button variant="outline" size="sm" onClick={() => store.setStatus("pending_review")}>Submit for Review</Button>
           )}
           {store.status === "pending_review" && <Badge variant="warning">Under Review</Badge>}
           {store.status === "approved" && <Badge variant="success">Approved</Badge>}

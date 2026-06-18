@@ -26,15 +26,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
     const reply = await generateChatReply(chatbotId, message, history, flowData)
 
     const dateStr = new Date().toISOString().split("T")[0]
-    let session = await prisma.chatSession.findFirst({
-      where: { chatbotId, createdAt: { gte: new Date(dateStr) }, userId },
-    })
+    const sessionId = `session-${chatbotId}-${dateStr}-${userId}`
 
-    if (!session) {
-      session = await prisma.chatSession.create({
-        data: { chatbotId, userId: userId },
-      })
-    }
+    let session = await prisma.chatSession.upsert({
+      where: { id: sessionId },
+      update: {},
+      create: { id: sessionId, chatbotId, userId },
+    })
 
     await prisma.message.createMany({
       data: [

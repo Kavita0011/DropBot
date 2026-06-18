@@ -25,6 +25,7 @@ export function FlowNode({ node }: FlowNodeProps) {
   const store = useChatbotStore()
   const config = nodeConfig[node.type]
   const isSelected = store.selectedNodeId === node.id
+  const isMultiSelected = store.selectedNodeIds.includes(node.id)
   const [showMenu, setShowMenu] = useState(false)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
   const menuRef = useRef<HTMLDivElement>(null)
@@ -56,10 +57,11 @@ export function FlowNode({ node }: FlowNodeProps) {
         style={{ ...style, left: node.position.x, top: node.position.y }}
         className={cn(
           "absolute w-56 rounded-xl border-2 bg-white shadow-md transition-all duration-150",
-          isSelected ? "border-blue-500 shadow-lg ring-2 ring-blue-100 ring-offset-1" : "border-gray-200 hover:border-gray-300 hover:shadow-lg",
-          isDragging && "opacity-70 shadow-2xl z-50 scale-[1.02] rotate-0"
+          (isSelected || isMultiSelected) ? "border-blue-500 shadow-lg ring-2 ring-blue-100 ring-offset-1" : "border-gray-200 hover:border-gray-300 hover:shadow-lg",
+          isMultiSelected && !isSelected && "border-blue-300 shadow-md",
+          isDragging && "opacity-70 shadow-2xl z-50 scale-[1.02]"
         )}
-        onClick={(e) => { e.stopPropagation(); store.selectNode(node.id) }}
+        onClick={(e) => { e.stopPropagation(); if (e.shiftKey) { store.toggleNodeSelection(node.id) } else { store.selectNode(node.id) } }}
         onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setMenuPos({ x: e.clientX, y: e.clientY }); setShowMenu(true) }}
       >
         <div className={cn("flex items-center gap-2 rounded-t-xl px-3 py-2.5 border-b", isSelected ? "border-blue-100 bg-blue-50/50" : "border-gray-100 bg-gray-50/50")}>
@@ -67,6 +69,9 @@ export function FlowNode({ node }: FlowNodeProps) {
             {config.icon}
           </div>
           <span className="flex-1 text-xs font-semibold text-gray-700">{config.label}</span>
+          {isMultiSelected && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] text-white font-bold shadow-sm">{store.selectedNodeIds.indexOf(node.id) + 1}</span>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); store.removeNode(node.id) }}
             className="text-gray-400 hover:text-red-500 transition-colors rounded p-0.5 hover:bg-red-50"
@@ -93,12 +98,12 @@ export function FlowNode({ node }: FlowNodeProps) {
           )}
         </div>
 
-        <div className={cn("absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-20", (isSelected || hasConnection) ? "bg-blue-400" : "bg-gray-300")} />
+        <div className={cn("absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-20", (isSelected || isMultiSelected || hasConnection) ? "bg-blue-400" : "bg-gray-300")} />
       </div>
 
       {showMenu && (
         <div ref={menuRef} className="fixed z-[100] bg-white rounded-xl shadow-2xl border border-gray-200 py-1.5 min-w-[140px]" style={{ left: menuPos.x, top: menuPos.y }} onClick={(e) => e.stopPropagation()}>
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => { const newNode = { ...node, id: crypto.randomUUID(), position: { x: node.position.x + 40, y: node.position.y + 60 } }; store.addNode(newNode); store.selectNode(newNode.id); setShowMenu(false) }}>
+          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => { store.duplicateNode(node.id); setShowMenu(false) }}>
             <Copy className="h-3.5 w-3.5" /> Duplicate
           </button>
           <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50" onClick={() => { store.removeNode(node.id); setShowMenu(false) }}>

@@ -18,14 +18,17 @@ async function main() {
     },
   })
 
+  const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+
   await prisma.subscription.upsert({
     where: { id: `sub-${admin.id}` },
-    update: {},
+    update: { subscriptionEnd: thirtyDays },
     create: {
       id: `sub-${admin.id}`,
       userId: admin.id,
       plan: "business",
       status: "active",
+      subscriptionEnd: thirtyDays,
     },
   })
 
@@ -41,12 +44,13 @@ async function main() {
 
   await prisma.subscription.upsert({
     where: { id: `sub-${demo.id}` },
-    update: {},
+    update: { subscriptionEnd: thirtyDays },
     create: {
       id: `sub-${demo.id}`,
       userId: demo.id,
       plan: "pro",
       status: "active",
+      subscriptionEnd: thirtyDays,
     },
   })
 
@@ -76,9 +80,9 @@ async function main() {
   console.log("Seeded: admin user, demo user, and default plans")
 
   const plans = [
-    { key: "free", name: "Free", price: 0, chatbots: 1, nodes: 10, chats: 100, features: JSON.stringify(["1 chatbot", "10 nodes", "100 chats/month"]), popular: false },
-    { key: "pro", name: "Pro", price: 2900, chatbots: 5, nodes: 50, chats: 5000, priceId: process.env.STRIPE_PRO_PRICE_ID || "", features: JSON.stringify(["5 chatbots", "50 nodes", "5,000 chats/month", "AI responses"]), popular: true },
-    { key: "business", name: "Business", price: 9900, chatbots: -1, nodes: -1, chats: -1, priceId: process.env.STRIPE_BUSINESS_PRICE_ID || "", features: JSON.stringify(["Unlimited chatbots", "Unlimited nodes", "Unlimited chats", "Custom branding"]), popular: false },
+    { key: "free", name: "Free", price: 0, priceInr: 0, chatbots: 1, nodes: 10, chats: 100, features: JSON.stringify(["1 chatbot", "10 nodes", "100 chats/month"]), popular: false },
+    { key: "pro", name: "Pro", price: 2900, priceInr: 249900, chatbots: 5, nodes: 50, chats: 5000, priceId: process.env.STRIPE_PRO_PRICE_ID || "", features: JSON.stringify(["5 chatbots", "50 nodes", "5,000 chats/month", "AI responses"]), popular: true },
+    { key: "business", name: "Business", price: 9900, priceInr: 799900, chatbots: -1, nodes: -1, chats: -1, priceId: process.env.STRIPE_BUSINESS_PRICE_ID || "", features: JSON.stringify(["Unlimited chatbots", "Unlimited nodes", "Unlimited chats", "Custom branding"]), popular: false },
   ]
 
   for (const p of plans) {
@@ -94,7 +98,7 @@ async function main() {
     update: {},
     create: {
       id: "platform",
-      upiId: "devappkavita@gmail.com",
+      upiId: "devappkavita@oksbi",
       bankDisplayName: "HDFC Bank",
       bankAccountNumber: "1234567890123456",
       bankIfsc: "HDFC0001234",

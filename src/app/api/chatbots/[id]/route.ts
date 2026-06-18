@@ -20,6 +20,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return NextResponse.json(chatbot)
 }
 
+const USER_STATUSES = ["draft", "pending_review"] as const
+const ADMIN_STATUSES = ["approved", "rejected"] as const
+const ALLOWED_FIELDS = ["name", "description", "welcomeMsg", "themeColor", "accentColor", "position", "bgColor", "textColor", "flowData", "logoUrl"] as const
+
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -37,21 +41,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
+  const isAdmin = (session?.user as { role?: string })?.role === "admin"
+  const data: Record<string, unknown> = {}
+  for (const field of ALLOWED_FIELDS) {
+    if (body[field] !== undefined) data[field] = body[field]
+  }
+  if (body.status !== undefined) {
+    if (isAdmin && [...ADMIN_STATUSES, ...USER_STATUSES].includes(body.status)) {
+      data.status = body.status
+    } else if (!isAdmin && USER_STATUSES.includes(body.status)) {
+      data.status = body.status
+    }
+  }
+
   const updated = await prisma.chatbot.update({
     where: { id },
-    data: {
-      name: body.name,
-      description: body.description,
-      welcomeMsg: body.welcomeMsg,
-      themeColor: body.themeColor,
-      accentColor: body.accentColor,
-      position: body.position,
-      bgColor: body.bgColor,
-      textColor: body.textColor,
-      flowData: body.flowData,
-      status: body.status !== undefined ? body.status : chatbot.status,
-      logoUrl: body.logoUrl,
-    },
+    data,
   })
 
   return NextResponse.json(updated)

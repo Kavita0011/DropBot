@@ -18,12 +18,13 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  chatbots      Chatbot[]
-  subscriptions Subscription[]
-  payments      Payment[]
-  accounts      Account[]
-  sessions      Session[]
-  chatSessions  ChatSession[]
+  chatbots          Chatbot[]
+  subscriptions    Subscription[]
+  payments         Payment[]
+  paymentScreenshots PaymentScreenshot[]
+  accounts         Account[]
+  sessions         Session[]
+  chatSessions     ChatSession[]
 }
 
 model Account {
@@ -103,6 +104,8 @@ model Subscription {
   status               String   @default("inactive")
   currentPeriodEnd     DateTime?
   plan                 String   @default("free")
+  subscriptionEnd      DateTime?
+  graceEnd             DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -110,13 +113,43 @@ model Subscription {
 }
 
 model Payment {
-  id              String   @id @default(cuid())
-  userId          String
-  amount          Int
-  currency        String   @default("usd")
-  stripePaymentId String?
-  status          String   @default("pending")
-  createdAt       DateTime @default(now())
+  id               String   @id @default(cuid())
+  userId           String
+  amount           Int
+  currency         String   @default("usd")
+  status           String   @default("pending")
+  method           String   @default("manual")
+  planKey          String?
+  email            String?
+  phone            String?
+  gst              String?
+  address          String?
+  notes            String?
+  razorpayPaymentId String?
+  razorpayOrderId  String?
+  stripePaymentId  String?
+  refundId         String?
+  refundedAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PaymentScreenshot {
+  id            String   @id @default(cuid())
+  userId        String
+  planKey       String
+  amount        Int
+  currency      String   @default("inr")
+  screenshotUrl String?
+  upiRef        String?
+  bankRef       String?
+  notes         String?
+  status        String   @default("pending")
+  adminNote     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -169,6 +202,7 @@ model Plan {
   key         String   @unique
   description String   @default("")
   price       Int
+  priceInr    Int      @default(0)
   currency    String   @default("usd")
   priceId     String?
   chatbots    Int      @default(1)

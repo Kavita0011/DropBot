@@ -10,6 +10,10 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return (
     <div className="pt-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center mb-8">
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Simple, transparent pricing</h1>
+        <p className="mt-4 text-lg text-gray-500">Start free, scale as you grow. No hidden fees.</p>
+      </div>
       <PricingSection />
     </div>
   )
