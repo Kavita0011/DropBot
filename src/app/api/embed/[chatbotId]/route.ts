@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export async function GET(req: Request, { params }: { params: Promise<{ chatbotId: string }> }) {
+  const { chatbotId } = await params
 
   const chatbot = await prisma.chatbot.findUnique({
-    where: { id },
+    where: { id: chatbotId },
     select: {
       id: true, name: true, welcomeMsg: true, themeColor: true, bgColor: true,
       textColor: true, position: true, logoUrl: true, status: true, createdAt: true,
