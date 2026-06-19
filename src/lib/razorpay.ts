@@ -1,4 +1,3 @@
-import Razorpay from "razorpay"
 import { createHmac } from "crypto"
 
 interface RazorpayOrderResult {
@@ -6,31 +5,41 @@ interface RazorpayOrderResult {
   currency: string; receipt: string; status: string; attempts: number; created_at: number
 }
 
-type RazorpayInstance = InstanceType<typeof Razorpay>
-
-function getClient(): RazorpayInstance | null {
+function getAuth(): { key_id: string; key_secret: string } | null {
   const key_id = process.env.RAZORPAY_KEY_ID
   const key_secret = process.env.RAZORPAY_KEY_SECRET
   if (!key_id || !key_secret) return null
-  return new Razorpay({ key_id, key_secret })
+  return { key_id, key_secret }
+}
+
+async function razorpayPost(path: string, body: Record<string, unknown>) {
+  const auth = getAuth()
+  if (!auth) return null
+  const res = await fetch(`https://api.razorpay.com/v1${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Basic " + Buffer.from(`${auth.key_id}:${auth.key_secret}`).toString("base64"),
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) return null
+  return res.json()
 }
 
 export async function createOrder(amount: number, currency: string, receipt: string): Promise<RazorpayOrderResult | null> {
-  const client = getClient()
-  if (!client) return null
-  const order = await client.orders.create({
+  return razorpayPost("/orders", {
     amount: Math.round(amount),
     currency: currency.toUpperCase(),
     receipt,
-    payment_capture: true,
-  })
-  return order as unknown as RazorpayOrderResult
+    payment_capture: 1,
+  }) as Promise<RazorpayOrderResult | null>
 }
 
 export function verifyPayment(orderId: string, paymentId: string, signature: string) {
-  const secret = process.env.RAZORPAY_KEY_SECRET
-  if (!secret) return false
-  const expected = createHmac("sha256", secret).update(`${orderId}|${paymentId}`).digest("hex")
+  const auth = getAuth()
+  if (!auth) return false
+  const expected = createHmac("sha256", auth.key_secret).update(`${orderId}|${paymentId}`).digest("hex")
   return expected === signature
 }
 
