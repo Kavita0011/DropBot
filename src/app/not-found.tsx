@@ -1,5 +1,12 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { MessageSquare } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "404 - Page Not Found",
+  description: "The page you're looking for doesn't exist.",
+  robots: { index: false, follow: false },
+}
 
 export default function NotFound() {
   return (

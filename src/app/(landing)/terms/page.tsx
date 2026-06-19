@@ -1,13 +1,31 @@
 import type { Metadata } from "next"
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dropbot.ai"
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+    { "@type": "ListItem", position: 2, name: "Terms & Conditions", item: `${baseUrl}/terms` },
+  ],
+}
+
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description: "DropBot terms and conditions. Learn about the rules and guidelines for using our AI chatbot builder platform.",
+  openGraph: {
+    title: "Terms & Conditions | DropBot",
+    description: "DropBot terms and conditions - rules and guidelines for using our AI chatbot builder platform.",
+    url: `${baseUrl}/terms`,
+  },
+  alternates: { canonical: `${baseUrl}/terms` },
 }
 
 export default function TermsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <h1 className="text-3xl font-bold mb-8">Terms &amp; Conditions</h1>
       <div className="prose prose-gray max-w-none space-y-6 text-sm leading-relaxed">
         <p><strong>Last updated:</strong> June 16, 2026</p>

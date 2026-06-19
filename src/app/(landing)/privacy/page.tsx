@@ -1,13 +1,31 @@
 import type { Metadata } from "next"
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dropbot.ai"
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+    { "@type": "ListItem", position: 2, name: "Privacy Policy", item: `${baseUrl}/privacy` },
+  ],
+}
+
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "DropBot privacy policy. Learn how we collect, use, and protect your personal data on our chatbot platform.",
+  openGraph: {
+    title: "Privacy Policy | DropBot",
+    description: "DropBot privacy policy - how we collect, use, and protect your personal data.",
+    url: `${baseUrl}/privacy`,
+  },
+  alternates: { canonical: `${baseUrl}/privacy` },
 }
 
 export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
       <div className="prose prose-gray max-w-none space-y-6 text-sm leading-relaxed">
         <p><strong>Last updated:</strong> June 16, 2026</p>

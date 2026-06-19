@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
+import Script from "next/script"
 import "./globals.css"
 import { Providers } from "./providers"
 
@@ -45,7 +46,6 @@ export const metadata: Metadata = {
     description: "Build intelligent chatbots with drag & drop. No coding required.",
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: baseUrl },
   icons: {
     icon: [{ url: "/icon-192.svg", type: "image/svg+xml" }],
   },
@@ -62,6 +62,7 @@ const jsonLd = {
       logo: `${baseUrl}/icon-512.svg`,
       description: "Build intelligent AI chatbots with drag and drop. No coding required.",
       foundingDate: "2024",
+      contactPoint: { "@type": "ContactPoint", email: "devappkavita@gmail.com", contactType: "support" },
     },
     {
       "@type": "WebSite",
@@ -79,7 +80,12 @@ const jsonLd = {
       name: "DropBot",
       operatingSystem: "Web",
       applicationCategory: "BusinessApplication",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      offers: [
+        { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Pro", price: "29", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Business", price: "99", priceCurrency: "USD" },
+      ],
+      description: "No-code AI chatbot builder with drag-and-drop interface.",
     },
   ],
 }
@@ -88,9 +94,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen antialiased">
-        <script dangerouslySetInnerHTML={{
-          __html: `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"||(t!="light"&&window.matchMedia("(prefers-color-scheme:dark)").matches))document.documentElement.classList.add("dark")}catch(e){}})()`
-        }} />
+        <Script defer data-domain="dropbot.ai" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function(){try{var t=localStorage.getItem("theme");if(t==="dark"||(t!="light"&&window.matchMedia("(prefers-color-scheme:dark)").matches))document.documentElement.classList.add("dark")}catch(e){}})()`}
+        </Script>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Providers>{children}</Providers>
       </body>

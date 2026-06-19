@@ -8,6 +8,14 @@ import { FAQ } from "@/components/landing/faq"
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dropbot.ai"
 
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+  ],
+}
+
 export const metadata: Metadata = {
   title: "AI Chatbot Builder - Drag & Drop No-Code Platform",
   description:
@@ -18,11 +26,13 @@ export const metadata: Metadata = {
     url: baseUrl,
     images: [{ url: "/og-image.svg", width: 1200, height: 630 }],
   },
+  alternates: { canonical: baseUrl },
 }
 
 export default function LandingPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <Hero />
       <StatsSection />
       <Features />
