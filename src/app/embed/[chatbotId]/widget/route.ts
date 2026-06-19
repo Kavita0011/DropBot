@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 export async function GET(req: Request, { params }: { params: Promise<{ chatbotId: string }> }) {
   const { chatbotId } = await params
   const chatbot = await prisma.chatbot.findFirst({
-    where: { id: chatbotId, status: "approved" },
+    where: { id: chatbotId, status: { not: "draft" } },
     select: { themeColor: true, position: true, name: true },
   })
   if (!chatbot) {

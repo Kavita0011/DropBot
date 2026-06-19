@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Save, Eye, ArrowLeft, Palette, Play, Undo2, Redo2, Trash2, Copy, Scissors, ClipboardPaste } from "lucide-react"
+import { Save, Eye, ArrowLeft, Palette, Play, Undo2, Redo2, Trash2, Copy, Scissors, ClipboardPaste, Globe } from "lucide-react"
 import { generateId } from "@/lib/utils"
 import toast from "react-hot-toast"
 import type { FlowNode } from "@/types"
@@ -162,12 +162,24 @@ export function BuilderWorkspace({ chatbotId, onBack }: { chatbotId: string; onB
           </button>
           <div className="w-px h-5 bg-gray-200 mx-1" />
           {store.status === "draft" && (
-            <Button variant="outline" size="sm" onClick={() => store.setStatus("pending_review")}>Submit for Review</Button>
+            <>
+              <Button variant="default" size="sm" onClick={() => store.setStatus("approved")} className="gap-1">
+                <Globe className="h-4 w-4" />Publish
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => store.setStatus("pending_review")}>Submit for Review</Button>
+            </>
           )}
-          {store.status === "pending_review" && <Badge variant="warning">Under Review</Badge>}
-          {store.status === "approved" && <Badge variant="success">Approved</Badge>}
+          {store.status === "pending_review" && (
+            <>
+              <Badge variant="warning">Under Review</Badge>
+              <Button variant="outline" size="sm" onClick={() => store.setStatus("approved")} className="gap-1 text-green-600 border-green-200 hover:bg-green-50">
+                <Globe className="h-4 w-4" />Publish Now
+              </Button>
+            </>
+          )}
+          {store.status === "approved" && <Badge variant="success">Published</Badge>}
           {store.status === "rejected" && (
-            <Button variant="outline" size="sm" onClick={() => store.setStatus("draft")}>Resubmit</Button>
+            <Button variant="outline" size="sm" onClick={() => store.setStatus("draft")}>Back to Draft</Button>
           )}
           <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1">
             <Save className="h-4 w-4" />{saving ? "Saving..." : "Save"}

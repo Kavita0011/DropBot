@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chatbotI
     },
   })
 
-  if (!chatbot || chatbot.status !== "approved") {
+  if (!chatbot || chatbot.status === "draft") {
     return NextResponse.json({ error: "Chatbot not found" }, { status: 404 })
   }
 

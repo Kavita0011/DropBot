@@ -20,7 +20,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return NextResponse.json(chatbot)
 }
 
-const USER_STATUSES = ["draft", "pending_review"] as const
+const USER_STATUSES = ["draft", "pending_review", "approved"] as const
 const ADMIN_STATUSES = ["approved", "rejected"] as const
 const ALLOWED_FIELDS = ["name", "description", "welcomeMsg", "themeColor", "accentColor", "position", "bgColor", "textColor", "flowData", "logoUrl"] as const
 

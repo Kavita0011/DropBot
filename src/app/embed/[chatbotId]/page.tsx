@@ -30,7 +30,7 @@ export default function EmbedPage() {
       .then((res) => res.json())
       .then((data) => {
         setChatbot(data)
-        if (data.status === "approved") {
+        if (data.status !== "draft") {
           setMessages([{ role: "bot", text: data.welcomeMsg }])
         }
       })
