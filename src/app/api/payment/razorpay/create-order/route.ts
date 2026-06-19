@@ -25,9 +25,20 @@ export async function POST(req: Request) {
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, email: true } })
 
+  const missing = [
+    !process.env.RAZORPAY_KEY_ID ? "RAZORPAY_KEY_ID" : null,
+    !process.env.RAZORPAY_KEY_SECRET ? "RAZORPAY_KEY_SECRET" : null,
+    !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ? "NEXT_PUBLIC_RAZORPAY_KEY_ID" : null,
+  ].filter(Boolean)
+  if (missing.length > 0) {
+    console.error("Razorpay 503: missing env vars:", missing.join(", "))
+    return NextResponse.json({ error: "Razorpay not configured", missing }, { status: 503 })
+  }
+
   const result = await createOrder(plan.priceInr, "INR", `order_${session.user.id}_${Date.now()}`)
   if (!result) {
-    return NextResponse.json({ error: "Razorpay not configured" }, { status: 503 })
+    console.error("Razorpay 503: createOrder returned null (API rejected or network error)")
+    return NextResponse.json({ error: "Razorpay not configured — API request failed" }, { status: 503 })
   }
 
   return NextResponse.json({
