@@ -37,7 +37,8 @@ export async function POST(req: Request) {
 
   let result
   try {
-    result = await createOrder(plan.priceInr, "INR", `order_${session.user.id}_${Date.now()}`)
+    const shortId = session.user.id.slice(0, 8)
+    result = await createOrder(plan.priceInr, "INR", `ord_${shortId}_${Date.now()}`)
   } catch (e: any) {
     console.error("Razorpay exception:", e?.message || e)
     return NextResponse.json({ error: "Razorpay exception: " + (e?.message || "unknown") }, { status: 503 })
