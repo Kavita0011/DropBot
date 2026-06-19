@@ -21,7 +21,6 @@ model User {
   chatbots          Chatbot[]
   subscriptions    Subscription[]
   payments         Payment[]
-  paymentScreenshots PaymentScreenshot[]
   accounts         Account[]
   sessions         Session[]
   chatSessions     ChatSession[]
@@ -136,24 +135,6 @@ model Payment {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model PaymentScreenshot {
-  id            String   @id @default(cuid())
-  userId        String
-  planKey       String
-  amount        Int
-  currency      String   @default("inr")
-  screenshotUrl String?
-  upiRef        String?
-  bankRef       String?
-  notes         String?
-  status        String   @default("pending")
-  adminNote     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model ChatSession {
   id        String   @id @default(cuid())
   chatbotId String
@@ -188,11 +169,6 @@ model PlatformSettings {
   bankName          String?
   bankAccount       String?
   payoutSchedule    String   @default("monthly")
-  upiId             String?
-  bankDisplayName   String?
-  bankAccountNumber String?
-  bankIfsc          String?
-  bankAccountHolder String?
   updatedAt         DateTime @updatedAt
 }
 

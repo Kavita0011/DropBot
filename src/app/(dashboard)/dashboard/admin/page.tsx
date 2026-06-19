@@ -11,8 +11,7 @@ import { cn } from "@/lib/utils"
 import {
   Users, Bot, CreditCard, TrendingUp, ShieldCheck, ShieldX, Search, Loader2,
   LayoutDashboard, UserCog, MessageSquare, DollarSign, CheckCircle, XCircle,
-  Clock, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Tag, Settings, Smartphone, Landmark,
-  ImageIcon, ExternalLink, Download
+  Clock, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Tag
 } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
 import toast from "react-hot-toast"
@@ -23,9 +22,7 @@ const TABS = [
   { key: "chatbots", label: "Chatbots", icon: MessageSquare },
   { key: "moderation", label: "Moderation", icon: ShieldCheck },
   { key: "pricing", label: "Pricing", icon: Tag },
-  { key: "payapprovals", label: "Payment Approvals", icon: ImageIcon },
   { key: "transactions", label: "Payments", icon: DollarSign },
-  { key: "paymentsettings", label: "Payment Settings", icon: Settings },
 ] as const
 
 interface AdminStats {
@@ -50,10 +47,9 @@ interface PendingChatbot {
   user: { id: string; name: string | null; email: string }
 }
 
-interface PaymentScreenshot {
-  id: string; userId: string; planKey: string; amount: number; currency: string
-  screenshotUrl: string | null; upiRef: string | null; bankRef: string | null
-  notes: string | null; status: string; adminNote: string | null; createdAt: string
+interface AdminPayment {
+  id: string; userId: string; amount: number; currency: string; status: string; method: string
+  planKey: string | null; razorpayPaymentId: string | null; createdAt: string
   user: { id: string; name: string | null; email: string }
 }
 
@@ -87,10 +83,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [chatbots, setChatbots] = useState<AdminChatbot[]>([])
   const [pending, setPending] = useState<PendingChatbot[]>([])
-  const [payScreenshots, setPayScreenshots] = useState<PaymentScreenshot[]>([])
+  const [payments, setPayments] = useState<AdminPayment[]>([])
   const [loading, setLoading] = useState(true)
   const [moderating, setModerating] = useState<string | null>(null)
-  const [approvingPay, setApprovingPay] = useState<string | null>(null)
   const [userSearch, setUserSearch] = useState("")
   const [chatbotSearch, setChatbotSearch] = useState("")
   const [chatbotFilter, setChatbotFilter] = useState<string>("all")
@@ -100,8 +95,6 @@ export default function AdminPage() {
   const [editingPlan, setEditingPlan] = useState<any | null>(null)
   const [showPlanForm, setShowPlanForm] = useState(false)
   const [featureInput, setFeatureInput] = useState("")
-  const [paySettings, setPaySettings] = useState({ upiId: "", bankDisplayName: "", bankAccountNumber: "", bankIfsc: "", bankAccountHolder: "" })
-  const [savingSettings, setSavingSettings] = useState(false)
 
   const isAdmin = (session?.user as { role?: string })?.role === "admin"
 
@@ -116,9 +109,10 @@ export default function AdminPage() {
       fetch("/api/chatbots").then((r) => r.json()),
       fetch("/api/admin/moderation").then((r) => r.json()),
       fetch("/api/admin/plans").then((r) => r.json()),
-      fetch("/api/admin/settings").then((r) => r.json()),
-      fetch("/api/admin/payment-screenshots").then((r) => r.json()),
-    ]).then(([s, u, c, p, pl, ps, psc]) => { setStats(s); setUsers(u); setChatbots(c); setPending(p); setPlans(pl); if (ps?.upiId || ps?.bankAccountNumber) setPaySettings(ps); setPayScreenshots(psc) })
+      fetch("/api/admin/payments").then((r) => r.json()),
+    ]).then(([s, u, c, p, pl, pm]) => {
+      setStats(s); setUsers(u); setChatbots(c); setPending(p); setPlans(pl); setPayments(pm)
+    })
       .catch(() => toast.error("Failed to load admin data"))
       .finally(() => setLoading(false))
   }, [status, isAdmin])
@@ -173,33 +167,11 @@ export default function AdminPage() {
     } else toast.error("Failed to save plan")
   }
 
-  const handleSaveSettings = async () => {
-    setSavingSettings(true)
-    const res = await fetch("/api/admin/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(paySettings) })
-    if (res.ok) toast.success("Payment settings saved!")
-    else toast.error("Failed to save settings")
-    setSavingSettings(false)
-  }
-
   const handleDeletePlan = async (id: string) => {
     if (!confirm("Delete this plan?")) return
     const res = await fetch("/api/admin/plans", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
     if (res.ok) { toast.success("Plan deleted"); setPlans((prev) => prev.filter((p) => p.id !== id)) }
     else toast.error("Failed to delete plan")
-  }
-
-  const handlePayApprove = async (id: string, status: "approved" | "rejected") => {
-    setApprovingPay(id)
-    const res = await fetch("/api/admin/payment-screenshots", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status }),
-    })
-    if (res.ok) {
-      toast.success(status === "approved" ? "Payment approved, plan activated!" : "Payment rejected")
-      setPayScreenshots((prev) => prev.map((p) => p.id === id ? { ...p, status, adminNote: status === "rejected" ? "Rejected by admin" : null } : p))
-    } else toast.error("Failed to update")
-    setApprovingPay(null)
   }
 
   const filteredUsers = useMemo(() => {
@@ -639,97 +611,29 @@ export default function AdminPage() {
         </div>
       )}
 
-      {tab === "payapprovals" && (
-        <div className="space-y-4">
-          <Card className="border-amber-200 bg-amber-50">
-            <CardContent className="p-4 text-sm text-amber-800">
-              <p className="font-medium">Important: Verify payment amount matches plan price before approving.</p>
-              <p className="mt-1">Payments with lesser or higher amounts than the plan price will not be approved. No refunds or money-back once approved — downgrade/switch plan via user settings.</p>
-            </CardContent>
-          </Card>
-          {payScreenshots.length === 0 ? (
-            <Card><CardContent className="flex flex-col items-center justify-center py-16 text-gray-400">
-              <ImageIcon className="h-12 w-12 mb-4 text-gray-300" />
-              <p className="text-lg font-medium text-gray-500">No Payment Submissions</p>
-              <p className="text-sm mt-1">User payment screenshots will appear here.</p>
-            </CardContent></Card>
-          ) : (
-            payScreenshots.map((ps) => {
-              const plan = plans.find((p: any) => p.key === ps.planKey)
-              const expectedAmount = ps.currency === "inr" ? plan?.priceInr : plan?.price
-              const amountMatches = expectedAmount ? ps.amount === expectedAmount : true
-              return (
-              <Card key={ps.id} className={cn("border-l-4", ps.status === "pending" ? "border-l-yellow-400" : ps.status === "approved" ? "border-l-green-400" : "border-l-red-400")}>
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={ps.status === "pending" ? "warning" : ps.status === "approved" ? "success" : "destructive"} className="text-[10px]">{ps.status}</Badge>
-                        <span className="font-semibold text-gray-900 capitalize">{ps.planKey} Plan</span>
-                        <span className="text-sm text-gray-500">— {ps.currency === "inr" ? "₹" + (ps.amount / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "$" + (ps.amount / 100).toFixed(2)} <span className="text-xs uppercase">{ps.currency}</span></span>
-                      </div>
-                      <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
-                        <span className="flex items-center gap-1"><UserCog className="h-3.5 w-3.5 text-gray-400" /> {ps.user.name || ps.user.email}</span>
-                        <span className="text-xs text-gray-400"><Clock className="h-3.5 w-3.5 inline mr-1" />{new Date(ps.createdAt).toLocaleString()}</span>
-                        {ps.upiRef && <span className="text-xs text-gray-500">UPI Ref: {ps.upiRef}</span>}
-                        {ps.bankRef && <span className="text-xs text-gray-500">Bank Ref: {ps.bankRef}</span>}
-                      </div>
-                      {ps.notes && <p className="text-xs text-gray-500 italic">"{ps.notes}"</p>}
-                      {ps.adminNote && <p className="text-xs text-gray-400">Admin: {ps.adminNote}</p>}
-                    </div>
-                    <div className="flex items-start gap-3 ml-4">
-                      {ps.screenshotUrl && (
-                        <a href={ps.screenshotUrl} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1">
-                          <ExternalLink className="h-3 w-3" /> Screenshot
-                        </a>
-                      )}
-                      {ps.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button size="sm" className="gap-1" onClick={() => handlePayApprove(ps.id, "approved")} disabled={approvingPay === ps.id}>
-                            <CheckCircle className="h-4 w-4" /> Approve
-                          </Button>
-                          <Button size="sm" variant="outline" className="gap-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handlePayApprove(ps.id, "rejected")} disabled={approvingPay === ps.id}>
-                            <XCircle className="h-4 w-4" /> Reject
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })
-          )}
-        </div>
-      )}
-
       {tab === "transactions" && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Payment History ({payScreenshots.filter((ps) => ps.status !== "pending").length})</CardTitle>
+              <CardTitle>Payment History ({payments.length})</CardTitle>
               <Button variant="outline" size="sm" className="gap-1" onClick={() => {
-                const approved = payScreenshots.filter((ps) => ps.status !== "pending")
-                downloadCSV(approved.map((ps) => ({
-                  Date: new Date(ps.createdAt).toLocaleDateString(),
-                  User: ps.user.email,
-                  Plan: ps.planKey,
-                  Amount: ps.currency === "inr" ? "₹" + (ps.amount / 100).toFixed(2) : "$" + (ps.amount / 100).toFixed(2),
-                  Currency: ps.currency.toUpperCase(),
-                  Status: ps.status,
-                  "UPI Ref": ps.upiRef || "",
-                  "Bank Ref": ps.bankRef || "",
-                  Notes: ps.notes || "",
-                  "Admin Note": ps.adminNote || "",
+                downloadCSV(payments.map((p) => ({
+                  Date: new Date(p.createdAt).toLocaleDateString(),
+                  User: p.user.email,
+                  Plan: p.planKey || "—",
+                  Amount: p.currency === "inr" ? "₹" + (p.amount / 100).toFixed(2) : "$" + (p.amount / 100).toFixed(2),
+                  Currency: p.currency.toUpperCase(),
+                  Status: p.status,
+                  Method: p.method,
+                  "Razorpay ID": p.razorpayPaymentId || "",
                 })), "payment-history.csv")
-              }} disabled={payScreenshots.filter((ps) => ps.status !== "pending").length === 0}>
-                <Download className="h-4 w-4" /> Export CSV
+              }} disabled={payments.length === 0}>
+                Export CSV
               </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {payScreenshots.filter((ps) => ps.status !== "pending").length > 0 ? (
+            {payments.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -738,19 +642,19 @@ export default function AdminPage() {
                       <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">User</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">Plan</th>
                       <th className="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase">Amount</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">Method</th>
                       <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">Status</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">Ref</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {payScreenshots.filter((ps) => ps.status !== "pending").map((ps) => (
-                      <tr key={ps.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                        <td className="px-4 py-3 text-xs text-gray-500">{new Date(ps.createdAt).toLocaleDateString()}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{ps.user.email}</td>
-                        <td className="px-4 py-3 text-sm capitalize">{ps.planKey}</td>
-                        <td className="px-4 py-3 text-right font-medium">{ps.currency === "inr" ? "₹" + (ps.amount / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "$" + (ps.amount / 100).toFixed(2)}</td>
-                        <td className="px-4 py-3"><Badge variant={ps.status === "approved" ? "success" : "destructive"} className="text-[10px]">{ps.status}</Badge></td>
-                        <td className="px-4 py-3 text-xs text-gray-400">{ps.upiRef || ps.bankRef || "—"}</td>
+                    {payments.map((p) => (
+                      <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                        <td className="px-4 py-3 text-xs text-gray-500">{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">{p.user.email}</td>
+                        <td className="px-4 py-3 text-sm capitalize">{p.planKey || "—"}</td>
+                        <td className="px-4 py-3 text-right font-medium">{p.currency === "inr" ? "₹" + (p.amount / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "$" + (p.amount / 100).toFixed(2)}</td>
+                        <td className="px-4 py-3 text-xs capitalize">{p.method}</td>
+                        <td className="px-4 py-3"><Badge variant={p.status === "completed" ? "success" : p.status === "refunded" ? "warning" : "secondary"} className="text-[10px]">{p.status}</Badge></td>
                       </tr>
                     ))}
                   </tbody>
@@ -765,31 +669,6 @@ export default function AdminPage() {
             )}
           </CardContent>
         </Card>
-      )}
-
-      {tab === "paymentsettings" && (
-        <div className="space-y-6">
-          <div><h2 className="text-lg font-semibold">Payment Settings</h2><p className="text-sm text-gray-500 mt-1">Configure UPI ID and bank transfer details shown to users.</p></div>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Smartphone className="h-4 w-4 text-purple-600" /> UPI</CardTitle></CardHeader>
-              <CardContent>
-                <label className="text-xs font-medium text-gray-500">UPI ID</label>
-                <Input value={paySettings.upiId} onChange={(e) => setPaySettings({ ...paySettings, upiId: e.target.value })} className="mt-1 h-9" placeholder="example@upi" />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Landmark className="h-4 w-4 text-blue-600" /> Bank Transfer</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <div><label className="text-xs font-medium text-gray-500">Account Holder Name</label><Input value={paySettings.bankAccountHolder} onChange={(e) => setPaySettings({ ...paySettings, bankAccountHolder: e.target.value })} className="mt-1 h-9" /></div>
-                <div><label className="text-xs font-medium text-gray-500">Bank Name</label><Input value={paySettings.bankDisplayName} onChange={(e) => setPaySettings({ ...paySettings, bankDisplayName: e.target.value })} className="mt-1 h-9" placeholder="e.g. HDFC Bank" /></div>
-                <div><label className="text-xs font-medium text-gray-500">Account Number</label><Input value={paySettings.bankAccountNumber} onChange={(e) => setPaySettings({ ...paySettings, bankAccountNumber: e.target.value })} className="mt-1 h-9" /></div>
-                <div><label className="text-xs font-medium text-gray-500">IFSC Code</label><Input value={paySettings.bankIfsc} onChange={(e) => setPaySettings({ ...paySettings, bankIfsc: e.target.value })} className="mt-1 h-9" /></div>
-              </CardContent>
-            </Card>
-          </div>
-          <Button onClick={handleSaveSettings} disabled={savingSettings}>{savingSettings ? "Saving..." : "Save Payment Settings"}</Button>
-        </div>
       )}
     </div>
   )

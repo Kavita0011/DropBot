@@ -21,21 +21,8 @@ export async function PUT(req: Request) {
   const body = await req.json()
   const settings = await prisma.platformSettings.upsert({
     where: { id: "platform" },
-    update: {
-      upiId: body.upiId,
-      bankDisplayName: body.bankDisplayName,
-      bankAccountNumber: body.bankAccountNumber,
-      bankIfsc: body.bankIfsc,
-      bankAccountHolder: body.bankAccountHolder,
-    },
-    create: {
-      id: "platform",
-      upiId: body.upiId,
-      bankDisplayName: body.bankDisplayName,
-      bankAccountNumber: body.bankAccountNumber,
-      bankIfsc: body.bankIfsc,
-      bankAccountHolder: body.bankAccountHolder,
-    },
+    update: {},
+    create: { id: "platform" },
   })
 
   return NextResponse.json(settings)

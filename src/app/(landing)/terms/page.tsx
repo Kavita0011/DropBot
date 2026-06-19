@@ -31,8 +31,7 @@ export default function TermsPage() {
         </ul>
 
         <h2 className="text-xl font-semibold mt-8">5. Payment Terms</h2>
-        <p>Paid plans are billed in advance on a monthly basis. Payments can be made via UPI or Bank Transfer (NEFT/IMPS/RTGS) for manual processing, or via Stripe for automatic processing. All payments are non-refundable except as outlined in our Refund Policy.</p>
-        <p><strong>Manual Payment Approval:</strong> Payments submitted via UPI or Bank Transfer require admin approval. Payments with amounts lesser or higher than the plan price will not be approved. No refunds or money-back will be issued once a manual payment is approved. Plan downgrades or switches can be requested via admin.</p>
+        <p>Paid plans are billed in advance on a monthly basis. Payments are processed securely through Razorpay via credit/debit cards, UPI, net banking, and wallets. All payments are non-refundable except as outlined in our Refund Policy.</p>
 
         <h2 className="text-xl font-semibold mt-8">6. Cancellation</h2>
         <p>You may cancel your subscription at any time from the billing dashboard. Your access will continue until the end of the current billing period.</p>
@@ -44,7 +43,7 @@ export default function TermsPage() {
         <p>We reserve the right to modify these terms at any time. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
 
         <h2 className="text-xl font-semibold mt-8">9. Contact</h2>
-        <p>For questions about these terms, contact us at <a href="mailto:support@dropbot.ai" className="text-blue-600 hover:underline">support@dropbot.ai</a>.</p>
+        <p>For questions about these terms, contact us at <a href="mailto:devappkavita@gmail.com" className="text-blue-600 hover:underline">devappkavita@gmail.com</a>.</p>
       </div>
     </div>
   )

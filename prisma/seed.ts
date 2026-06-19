@@ -98,16 +98,11 @@ async function main() {
     update: {},
     create: {
       id: "platform",
-      upiId: "devappkavita@oksbi",
-      bankDisplayName: "HDFC Bank",
-      bankAccountNumber: "1234567890123456",
-      bankIfsc: "HDFC0001234",
-      bankAccountHolder: "Kavita",
     },
   })
 
   console.log("  Plans: Free, Pro, Business")
-  console.log("  Platform settings: UPI + Bank configured")
+  console.log("  Platform settings: configured")
 }
 
 main()

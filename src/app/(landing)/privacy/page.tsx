@@ -45,7 +45,7 @@ export default function PrivacyPage() {
         <p>We use essential cookies for authentication and session management. No tracking cookies are used.</p>
 
         <h2 className="text-xl font-semibold mt-8">8. Contact</h2>
-        <p>For privacy-related inquiries, contact us at <a href="mailto:support@dropbot.ai" className="text-blue-600 hover:underline">support@dropbot.ai</a>.</p>
+        <p>For privacy-related inquiries, contact us at <a href="mailto:devappkavita@gmail.com" className="text-blue-600 hover:underline">devappkavita@gmail.com</a>.</p>
       </div>
     </div>
   )

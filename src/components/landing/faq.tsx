@@ -3,7 +3,7 @@ const faqs = [
   { q: "How does the drag-and-drop builder work?", a: "Simply drag nodes onto the canvas, connect them to create conversation flows, and customize each node's behavior. It's as easy as drawing a flowchart." },
   { q: "Can I embed the chatbot on my website?", a: "Yes. Once you build your chatbot, we give you a single line of JavaScript code. Copy-paste it into your website's HTML and the chatbot appears instantly." },
   { q: "Is there a free plan?", a: "Yes, we offer a generous free plan that includes basic features, a limited number of conversations, and standard embedding. Upgrade to paid plans for more." },
-  { q: "Which payment methods do you accept?", a: "We accept Razorpay for INR payments and offline payments via UPI and bank transfer for Indian customers. International customers can pay via Razorpay." },
+  { q: "Which payment methods do you accept?", a: "We accept Razorpay for all payments. You can pay via credit/debit cards, UPI, net banking, and wallets — all processed securely through Razorpay." },
   { q: "Do I need an OpenAI API key?", a: "No, DropBot works out of the box. If you want to use your own OpenAI key for advanced customization, you can optionally connect it in settings." },
 ]
 
