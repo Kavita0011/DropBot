@@ -13,8 +13,8 @@
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #0b1120;
+  --foreground: #e2e8f0;
 }
 
 body {
@@ -34,5 +34,5 @@ body {
 
 @layer base {
   * { @apply border-gray-200; }
-  .dark * { @apply border-gray-800; }
+  .dark * { @apply border-gray-700/60; }
 }
