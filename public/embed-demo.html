@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DropBot Embed Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; }
+
+    .navbar { background: white; border-bottom: 1px solid #e2e8f0; padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-weight: 800; font-size: 20px; color: #2563eb; }
+    .nav-links { display: flex; gap: 24px; font-size: 14px; color: #64748b; }
+    .hero { text-align: center; padding: 80px 40px 60px; background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%); }
+    .hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
+    .hero h1 span { background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 18px; color: #64748b; max-width: 600px; margin: 0 auto 32px; line-height: 1.6; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .btn:hover { background: #1d4ed8; }
+
+    .content { max-width: 900px; margin: 0 auto; padding: 60px 40px; }
+    .content h2 { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+    .content p { color: #64748b; line-height: 1.8; margin-bottom: 20px; font-size: 15px; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+    .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .card p { font-size: 13px; color: #94a3b8; margin: 0; }
+
+    .demo-badge { position: fixed; top: 12px; right: 12px; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 99999; }
+    .demo-badge a { color: #2563eb; text-decoration: underline; }
+
+    .footer { text-align: center; padding: 40px; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo">Acme Corp</div>
+    <div class="nav-links">
+      <span>Home</span>
+      <span>Features</span>
+      <span>Pricing</span>
+      <span>Contact</span>
+    </div>
+  </div>
+
+  <section class="hero">
+    <h1>Welcome to <span>Acme Corp</span></h1>
+    <p>We build amazing products that help businesses grow. Our platform serves thousands of customers worldwide.</p>
+    <button class="btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Get Started Free
+    </button>
+  </section>
+
+  <div class="content">
+    <h2>Why choose us?</h2>
+    <p>We provide cutting-edge solutions designed to streamline your workflow, boost productivity, and drive growth. Our team of experts works tirelessly to deliver the best experience for our customers.</p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>&#9889; Lightning Fast</h3>
+        <p>Optimized infrastructure ensures blazing-fast performance every time.</p>
+      </div>
+      <div class="card">
+        <h3>&#128274; Enterprise Security</h3>
+        <p>Bank-grade encryption keeps your data safe and compliant.</p>
+      </div>
+      <div class="card">
+        <h3>&#127760; Global Reach</h3>
+        <p>Available in 50+ countries with 99.9% uptime guarantee.</p>
+      </div>
+    </div>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>
+  </div>
+
+  <div class="footer">&copy; 2026 Acme Corp. All rights reserved.</div>
+
+  <div class="demo-badge">
+    &#128274; DropBot Chat Widget &mdash;
+    <a href="/dashboard/chatbots" target="_blank">Go to Dashboard</a>
+  </div>
+
+  <script>
+    (function(){
+      var chatbotId = "DEMO";
+      var id = "db-" + chatbotId;
+      if (document.getElementById(id)) return;
+
+      var btn = document.createElement("div");
+      btn.id = id;
+      btn.innerHTML = '<button id="db-btn" style="position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;background:#2563eb;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,0.35);display:flex;align-items:center;justify-content:center;z-index:99999;transition:all 0.2s" aria-label="Chat">' +
+        '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+        '</button>';
+      document.body.appendChild(btn);
+
+      var iframe = null;
+      var open = false;
+      var chatOpen = false;
+
+      document.getElementById("db-btn").onclick = function() {
+        if (!iframe) {
+          iframe = document.createElement("div");
+          iframe.id = "db-chat-window";
+          iframe.innerHTML = '<div style="position:fixed;right:20px;bottom:90px;width:380px;height:560px;max-height:calc(100vh - 110px);background:white;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:99998;display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.25s ease-out">' +
+            '<div style="background:#2563eb;padding:16px;display:flex;align-items:center;justify-content:space-between">' +
+              '<div style="display:flex;align-items:center;gap:8px;color:white">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+                '<span style="font-weight:600;font-size:14px">Acme Assistant</span>' +
+              '</div>' +
+              '<button id="db-close" style="background:none;border:none;color:white;cursor:pointer;padding:2px">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>' +
+              '</button>' +
+            '</div>' +
+            '<div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px">' +
+              '<div style="display:flex;justify-content:flex-start">' +
+                '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 16px 4px;background:#f1f5f9;color:#1e293b;font-size:14px;line-height:1.5">Hi! How can I help you today? 👋</div>' +
+              '</div>' +
+              '<div style="display:flex;justify-content:flex-end">' +
+                '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 4px 16px;background:#2563eb;color:white;font-size:14px;line-height:1.5">I need help with pricing</div>' +
+              '</div>' +
+              '<div style="display:flex;justify-content:flex-start">' +
+                '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 16px 4px;background:#f1f5f9;color:#1e293b;font-size:14px;line-height:1.5">Sure! We have three plans: Free ($0), Pro ($29/mo), and Business ($99/mo). Which one interests you? 🚀</div>' +
+              '</div>' +
+              '<div style="display:flex;justify-content:flex-end">' +
+                '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 4px 16px;background:#2563eb;color:white;font-size:14px;line-height:1.5">Tell me about the Pro plan</div>' +
+              '</div>' +
+              '<div style="display:flex;justify-content:flex-start">' +
+                '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 16px 4px;background:#f1f5f9;color:#1e293b;font-size:14px;line-height:1.5">The Pro plan includes 5 chatbots, 50 nodes, 5,000 chats/month, and AI responses. It\'s our most popular choice! ⭐</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="border-top:1px solid #e2e8f0;padding:12px 16px;display:flex;gap:8px">' +
+              '<input id="db-input" placeholder="Type a message..." style="flex:1;padding:8px 14px;border-radius:8px;border:1px solid #d1d5db;outline:none;font-size:14px;background:#f8fafc">' +
+              '<button id="db-send" style="width:36px;height:36px;border-radius:8px;background:#2563eb;color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+          document.body.appendChild(iframe);
+
+          document.getElementById("db-close").onclick = function() {
+            closeChat();
+          };
+
+          document.getElementById("db-send").onclick = function() {
+            var input = document.getElementById("db-input");
+            if (input.value.trim()) {
+              var chatDiv = iframe.querySelector("div:nth-child(2)");
+              var userBubble = document.createElement("div");
+              userBubble.style.cssText = "display:flex;justify-content:flex-end";
+              userBubble.innerHTML = '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 4px 16px;background:#2563eb;color:white;font-size:14px;line-height:1.5">' + input.value + '</div>';
+              chatDiv.appendChild(userBubble);
+              chatDiv.scrollTop = chatDiv.scrollHeight;
+
+              setTimeout(function() {
+                var botBubble = document.createElement("div");
+                botBubble.style.cssText = "display:flex;justify-content:flex-start";
+                botBubble.innerHTML = '<div style="max-width:80%;padding:10px 16px;border-radius:16px 16px 16px 4px;background:#f1f5f9;color:#1e293b;font-size:14px;line-height:1.5">Thanks for your message! This is a live preview. To set up your own chatbot, visit your DropBot dashboard. 😊</div>';
+                chatDiv.appendChild(botBubble);
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+              }, 800);
+
+              input.value = "";
+            }
+          };
+
+          document.getElementById("db-input").onkeydown = function(e) {
+            if (e.key === "Enter") document.getElementById("db-send").click();
+          };
+        }
+
+        open = !open;
+        iframe.style.display = open ? "block" : "none";
+        btn.style.display = open ? "none" : "block";
+
+        if (open) {
+          setTimeout(function() {
+            var input = document.getElementById("db-input");
+            if (input) input.focus();
+          }, 300);
+        }
+      };
+
+      function closeChat() {
+        open = false;
+        iframe.style.display = "none";
+        btn.style.display = "block";
+      }
+    })();
+  </script>
+
+  <style>
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #db-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(37,99,235,0.45) !important; }
+  </style>
+
+</body>
+</html>

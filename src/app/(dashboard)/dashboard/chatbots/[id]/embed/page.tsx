@@ -192,7 +192,12 @@ function ChatWidget() {
             <Eye className="h-5 w-5 text-gray-400" />
             <h3 className="font-semibold text-gray-900">Live Preview</h3>
           </div>
-          <Badge variant="secondary" className="rounded-full text-xs">Demo</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="rounded-full text-xs">Demo</Badge>
+            <a href="/embed-demo.html" target="_blank" className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+              <Globe className="h-3.5 w-3.5" /> Open Full Page Demo
+            </a>
+          </div>
         </div>
         <div className="p-6">
           <div className="relative rounded-xl border border-dashed border-gray-300 bg-gray-50/50 h-[400px] flex items-center justify-center">
