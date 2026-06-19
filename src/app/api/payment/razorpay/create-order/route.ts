@@ -35,9 +35,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Razorpay not configured", missing }, { status: 503 })
   }
 
-  const result = await createOrder(plan.priceInr, "INR", `order_${session.user.id}_${Date.now()}`)
+  let result
+  try {
+    result = await createOrder(plan.priceInr, "INR", `order_${session.user.id}_${Date.now()}`)
+  } catch (e: any) {
+    console.error("Razorpay exception:", e?.message || e)
+    return NextResponse.json({ error: "Razorpay exception: " + (e?.message || "unknown") }, { status: 503 })
+  }
   if (!result) {
-    console.error("Razorpay 503: createOrder returned null (API rejected or network error)")
     return NextResponse.json({ error: "Razorpay not configured — API request failed" }, { status: 503 })
   }
 

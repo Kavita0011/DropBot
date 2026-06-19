@@ -23,7 +23,10 @@ async function razorpayPost(path: string, body: Record<string, unknown>) {
     },
     body: JSON.stringify(body),
   })
-  if (!res.ok) return null
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => "unknown")
+    throw new Error(`Razorpay API ${res.status}: ${errBody}`)
+  }
   return res.json()
 }
 
