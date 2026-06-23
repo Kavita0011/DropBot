@@ -1,10 +1,15 @@
 import { createHmac, timingSafeEqual } from "crypto"
 
+// Direct REST API wrapper for Razorpay (no npm package — avoids CJS/ESM interop issues on Vercel serverless).
+// Uses Basic auth with key_id:key_secret over HTTPS. All amounts in smallest currency unit (paise/cents).
+
 interface RazorpayOrderResult {
   id: string; amount: number; amount_due: number; amount_paid: number
   currency: string; receipt: string; status: string; attempts: number; created_at: number
 }
 
+// Returns latest live keys from env (no fallback — production-only).
+// Returns null if either key is missing, causing createOrder/verifyPayment to fail gracefully.
 function getAuth(): { key_id: string; key_secret: string } | null {
   const key_id = process.env.RAZORPAY_KEY_ID
   const key_secret = process.env.RAZORPAY_KEY_SECRET
@@ -12,6 +17,7 @@ function getAuth(): { key_id: string; key_secret: string } | null {
   return { key_id, key_secret }
 }
 
+// Generic POST helper for Razorpay REST API. Throws on non-2xx to surface errors like invalid receipts.
 async function razorpayPost(path: string, body: Record<string, unknown>) {
   const auth = getAuth()
   if (!auth) return null
@@ -30,6 +36,7 @@ async function razorpayPost(path: string, body: Record<string, unknown>) {
   return res.json()
 }
 
+// Creates a Razorpay order. payment_capture: 1 means auto-capture on successful payment.
 export async function createOrder(amount: number, currency: string, receipt: string): Promise<RazorpayOrderResult | null> {
   return razorpayPost("/orders", {
     amount: Math.round(amount),
@@ -39,6 +46,8 @@ export async function createOrder(amount: number, currency: string, receipt: str
   }) as Promise<RazorpayOrderResult | null>
 }
 
+// Constant-time HMAC-SHA256 comparison to prevent timing attacks on signature verification.
+// Uses timingSafeEqual from the crypto module — never use === for cryptographic comparisons.
 export function verifyPayment(orderId: string, paymentId: string, signature: string) {
   const auth = getAuth()
   if (!auth) return false

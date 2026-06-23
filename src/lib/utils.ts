@@ -5,6 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Generates a UUID v4. Uses crypto.randomUUID() where available, falls back to manual UUID v4 construction
+// for environments (like older Edge runtimes) that don't support randomUUID.
 export function generateId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID()
   const arr = new Uint8Array(16)

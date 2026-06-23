@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { generateChatReply } from "@/lib/ai"
 import { checkChatLimit } from "@/lib/plans"
 
+// Public chat endpoint (no auth) — embedded widget calls this.
+// Rate limits are checked against the chatbot owner, not the end user/visitor.
+
 export async function POST(req: Request, { params }: { params: Promise<{ chatbotId: string }> }) {
   try {
     const { chatbotId } = await params
@@ -31,6 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
     const flowData = JSON.parse(chatbot.flowData)
     const reply = await generateChatReply(chatbotId, message, history, flowData)
 
+    // Session scoped per chatbot + day + visitor — reuses same-day sessions for continuity via upsert
     const dateStr = new Date().toISOString().split("T")[0]
     const sessionId = `session-${chatbotId}-${dateStr}-${visitorId}`
 

@@ -76,16 +76,20 @@ const initialNodes: FlowNode[] = [
   },
 ]
 
+// Deep-clone via structuredClone — used for immutable state updates throughout the store
 function cc<T>(v: T): T { return structuredClone(v) }
 
+// Captures current node/edge state as a history entry for undo/redo
 function snapshot(get: () => ChatbotStore): HistoryEntry {
   return { nodes: cc(get().nodes), edges: cc(get().edges) }
 }
 
+// Pushes a history snapshot before mutations; caps at 50 entries to limit memory; clears future on new action
 function pushHistory(set: any, get: () => ChatbotStore) {
   set((s: ChatbotStore) => ({ past: [...s.past.slice(-50), snapshot(get)], future: [] }))
 }
 
+// Guard: rejects self-loops and duplicate edges (same source-target pair)
 function canConnect(nodes: FlowNode[], edges: FlowEdge[], source: string, target: string): boolean {
   if (source === target) return false
   if (edges.some((e) => e.source === source && e.target === target)) return false
@@ -116,7 +120,9 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
   addNode: (node) => { pushHistory(set, get); set((s) => ({ nodes: [...s.nodes, node] })) },
+  // skipHistory=true allows high-frequency updates (e.g. text input keystrokes) without flooding the undo stack
   updateNode: (id, data, skipHistory) => { if (!skipHistory) pushHistory(set, get); set((s) => ({ nodes: s.nodes.map((n) => (n.id === id ? { ...n, ...data } : n)) })) },
+  // Manually commits a history point — used after a batch of skipHistory updates to create a single undo entry
   commitHistory: () => pushHistory(set, get),
   updateNodePosition: (id, x, y) => set((s) => ({ nodes: s.nodes.map((n) => (n.id === id ? { ...n, position: { x, y } } : n)) })),
   removeNode: (id) => { pushHistory(set, get); set((s) => ({ nodes: s.nodes.filter((n) => n.id !== id), edges: s.edges.filter((e) => e.source !== id && e.target !== id), selectedNodeId: s.selectedNodeId === id ? null : s.selectedNodeId, selectedNodeIds: s.selectedNodeIds.filter((nid) => nid !== id) })) },

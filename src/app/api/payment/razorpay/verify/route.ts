@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { verifyPayment } from "@/lib/razorpay"
 
+// Payment verification + subscription creation in a single Prisma transaction.
+// If the existing subscription end is still in the future, the new period extends from there (not from now).
+
 export async function POST(req: Request) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -27,6 +30,8 @@ export async function POST(req: Request) {
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, email: true } })
 
+  // Find most recent subscription to carry over end date — if current period hasn't expired,
+  // the new 30-day period starts from the existing end date (stacking), not from today.
   const existingSub = await prisma.subscription.findFirst({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },

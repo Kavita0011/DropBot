@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+// Security headers: CSP frame-ancestors for all paths (DENY by default), overridden to * for /embed/* paths.
+// /embed/:path* rule MUST appear after /:path* in the rules array so it takes precedence.
+// HSTS preload (2 years), strict Referrer-Policy, and restrictive Permissions-Policy for security.
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,

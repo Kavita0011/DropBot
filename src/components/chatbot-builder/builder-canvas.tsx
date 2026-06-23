@@ -8,6 +8,9 @@ import { useChatbotStore } from "@/store/chatbot-store"
 import type { FlowNode as FlowNodeType, FlowEdge } from "@/types"
 import { Plus, Minus, Maximize2, Minimize2, Trash2, Grid3X3, MousePointerClick } from "lucide-react"
 
+// Canvas coordinate system: screen coords are transformed to canvas coords via zoom + pan.
+// Connection port is at bottom-center of each node (x + NODE_WIDTH/2, y + NODE_OUTPUT_Y).
+// Beziers route source output port to target input port (top-center).
 const SNAP = 20
 const NODE_WIDTH = 224
 const NODE_OUTPUT_Y = 96

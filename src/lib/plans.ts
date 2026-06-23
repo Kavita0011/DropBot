@@ -1,5 +1,6 @@
 import { prisma } from "./prisma"
 
+// All limit functions use -1 to mean "unlimited" (admin role always returns -1 for all limits)
 async function getPlanLimitsFromDb(planKey: string) {
   const plan = await prisma.plan.findUnique({ where: { key: planKey } })
   if (plan) {
@@ -8,6 +9,8 @@ async function getPlanLimitsFromDb(planKey: string) {
   return { chatbots: 1, nodes: 10, chats: 100, name: "Free", price: 0 }
 }
 
+// Returns plan limits for a user. Admin always returns -1 (unlimited) bypassing DB lookup.
+// Falls back to free plan limits if subscription is expired/missing.
 export async function getPlanLimits(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } })
   if (user?.role === "admin") {
@@ -61,6 +64,7 @@ export async function checkNodeLimit(userId: string, newNodes: number): Promise<
   return { allowed: true }
 }
 
+// Daily chat limit, reset at midnight UTC. Counts total messages, not sessions, for accuracy.
 export async function checkChatLimit(userId: string): Promise<{ allowed: boolean; error?: string }> {
   const limits = await getPlanLimits(userId)
   if (limits.chats === -1) return { allowed: true }

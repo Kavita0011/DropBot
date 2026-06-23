@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
+// Seeds: admin user (devappkavita@gmail.com, business plan), demo user (demo@dropbot.ai, pro plan),
+// sample chatbot with 3-node flow, three plan tiers (free/pro/business), and platform settings singleton.
+// priceId (Stripe) is only written to DB when its env var is non-empty.
+// Admin password uses SEED_PASSWORD env var or defaults to "password123".
 const prisma = new PrismaClient()
 
 async function main() {

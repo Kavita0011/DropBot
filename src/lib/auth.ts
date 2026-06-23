@@ -4,6 +4,11 @@ import bcrypt from "bcryptjs"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
 
+// Credentials-only auth with JWT sessions (no OAuth).
+// JWT callback injects user.id and user.role into the token; session callback reads them into session.user.
+// The trigger === "update" branch handles admin-initiated role changes. 
+// @see src/types/next-auth.d.ts for augmented session/user types.
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },

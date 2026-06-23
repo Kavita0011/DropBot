@@ -16,8 +16,10 @@ import { generateId } from "@/lib/utils"
 import toast from "react-hot-toast"
 import type { FlowNode } from "@/types"
 
+// Snaps a value to the nearest grid point (20px). Also used by the canvas for rendering.
 const SNAP = 20
 function snapToGrid(val: number): number { return Math.round(val / SNAP) * SNAP }
+// Fallback position calculator for palette drags when onDragMove coordinates aren't available.
 function getNextPosition(nodes: FlowNode[]): { x: number; y: number } {
   if (nodes.length === 0) return { x: 300, y: 50 }
   const maxY = Math.max(...nodes.map((n) => n.position.y))

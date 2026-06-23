@@ -1,5 +1,9 @@
+// The seven node types in the chatbot builder flow chart.
+// Each has a distinct behavior at runtime and a distinct editor form in node-editor.tsx.
 export type NodeType = "welcome" | "message" | "options" | "input" | "condition" | "api_call" | "end";
 
+// A node on the builder canvas. data is type-specific: message/welcome stores { message }, options stores { question, choices[] },
+// input stores { question, variable }, condition stores { condVariable, condOperator, condValue }, api_call stores { apiUrl, method }.
 export interface FlowNode {
   id: string;
   type: NodeType;
@@ -7,6 +11,8 @@ export interface FlowNode {
   data: Record<string, unknown>;
 }
 
+// A directed connection between two nodes. label is used for condition branches (e.g., "True"/"False")
+// and for routing options node choices.
 export interface FlowEdge {
   id: string;
   source: string;

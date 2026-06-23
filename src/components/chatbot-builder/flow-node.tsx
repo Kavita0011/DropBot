@@ -119,6 +119,8 @@ function FlowNodeInner({ node }: { node: FlowNodeType }) {
   )
 }
 
+// Custom memo comparator: compares id, type, position by value, and data via JSON serialization
+// (since data is a nested object and React.memo's shallow compare would miss changes).
 export const FlowNode = memo(FlowNodeInner, (prev, next) => {
   return prev.node.id === next.node.id
     && prev.node.type === next.node.type

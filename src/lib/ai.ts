@@ -1,12 +1,14 @@
 import OpenAI from "openai"
 import type { FlowNode, FlowEdge } from "@/types"
 
+// Attempts to init OpenAI client — returns null if API key is not configured (local-only mode)
 function getOpenAI() {
   const key = process.env.OPENAI_API_KEY
   if (!key) return null
   return new OpenAI({ apiKey: key })
 }
 
+// Builds the message array for OpenAI: system prompt (from welcome node) + last 10 history turns + current user message
 function buildConversationContext(nodes: FlowNode[], edges: FlowEdge[], userMessage: string, history: { role: "user" | "assistant"; content: string }[]) {
   const welcomeNode = nodes.find((n) => n.type === "welcome")
   const systemPrompt = welcomeNode?.data?.message
@@ -26,6 +28,7 @@ function buildConversationContext(nodes: FlowNode[], edges: FlowEdge[], userMess
   return messages
 }
 
+// Calls OpenAI gpt-4o-mini; returns null if key is missing or API call fails (triggers local fallback)
 async function getAIReply(messages: { role: "system" | "user" | "assistant"; content: string }[]) {
   const openai = getOpenAI()
   if (!openai) return null
@@ -40,6 +43,8 @@ async function getAIReply(messages: { role: "system" | "user" | "assistant"; con
   return completion.choices[0]?.message?.content || null
 }
 
+// Fallback flow engine: walks the node graph based on current node type.
+// Used when OpenAI is unavailable — handles welcome, message, options, input, and end nodes.
 function getLocalReply(nodes: FlowNode[], edges: FlowEdge[], currentNodeId: string | null, userMessage: string): { reply: string; nextNodeId: string | null } {
   if (!currentNodeId) {
     const welcome = nodes.find((n) => n.type === "welcome")
@@ -73,6 +78,8 @@ function getLocalReply(nodes: FlowNode[], edges: FlowEdge[], currentNodeId: stri
   return { reply: "How can I help you?", nextNodeId: null }
 }
 
+// Dual-mode chat reply: tries OpenAI first; falls back to local flow traversal if AI is unavailable or fails.
+// nodeId is returned for the client to track position in the flow graph for subsequent requests.
 export async function generateChatReply(
   chatbotId: string,
   userMessage: string,
