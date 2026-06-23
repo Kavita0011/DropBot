@@ -24,8 +24,13 @@ export async function PATCH(req: Request) {
   }
 
   const { chatbotId, status } = await req.json()
-  if (!["approved", "rejected"].includes(status)) {
+  if (!["approved", "rejected", "pending_review"].includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 })
+  }
+
+  const existing = await prisma.chatbot.findUnique({ where: { id: chatbotId } })
+  if (!existing) {
+    return NextResponse.json({ error: "Chatbot not found" }, { status: 404 })
   }
 
   const chatbot = await prisma.chatbot.update({

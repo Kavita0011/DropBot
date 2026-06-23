@@ -33,7 +33,8 @@ export function PricingSection() {
         </div>
         <div className="mt-16 grid gap-8 lg:grid-cols-3 items-start">
           {plans.map((plan) => {
-            const features = JSON.parse(plan.features) as string[]
+            let features: string[] = []
+            try { features = JSON.parse(plan.features) } catch {}
             return (
               <Card key={plan.id} className={cn("relative flex flex-col", plan.popular && "border-blue-500 ring-1 ring-blue-500 shadow-lg scale-105")}>
                 {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded-full">Most Popular</div>}

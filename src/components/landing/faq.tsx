@@ -21,20 +21,20 @@ export function FAQ() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <section className="border-t border-gray-100 py-20">
+      <section className="border-t border-gray-100 dark:border-gray-800 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Frequently asked questions</h2>
-            <p className="mt-4 text-lg text-gray-500">Everything you need to know about DropBot.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">Frequently asked questions</h2>
+            <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">Everything you need to know about DropBot.</p>
           </div>
-          <div className="mx-auto mt-16 max-w-3xl divide-y divide-gray-200">
+          <div className="mx-auto mt-16 max-w-3xl divide-y divide-gray-200 dark:divide-gray-700">
             {faqs.map((faq) => (
               <details key={faq.q} className="group py-5 cursor-pointer">
-                <summary className="flex items-center justify-between text-base font-semibold text-gray-900 list-none">
+                <summary className="flex items-center justify-between text-base font-semibold text-gray-900 dark:text-gray-100 list-none">
                   {faq.q}
-                  <span className="ml-6 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-400 group-open:rotate-45 transition-transform">+</span>
+                  <span className="ml-6 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 group-open:rotate-45 transition-transform">+</span>
                 </summary>
-                <p className="mt-3 text-sm text-gray-600 leading-relaxed pr-12">{faq.a}</p>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed pr-12">{faq.a}</p>
               </details>
             ))}
           </div>

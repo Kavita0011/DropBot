@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { refundPayment } from "@/lib/razorpay"
 
 export async function GET() {
   const session = await auth()
@@ -29,6 +30,14 @@ export async function PATCH(req: Request) {
   const payment = await prisma.payment.findUnique({ where: { id } })
   if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
   if (payment.status !== "completed") return NextResponse.json({ error: "Only completed payments can be refunded" }, { status: 400 })
+
+  if (payment.razorpayPaymentId) {
+    try {
+      await refundPayment(payment.razorpayPaymentId)
+    } catch (e: any) {
+      return NextResponse.json({ error: "Razorpay refund failed: " + (e?.message || "unknown") }, { status: 502 })
+    }
+  }
 
   await prisma.payment.update({
     where: { id },

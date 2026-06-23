@@ -23,23 +23,27 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    const user = await prisma.user.create({
-      data: {
-        name: name || email.split("@")[0],
-        email,
-        password: hashedPassword,
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name: name || email.split("@")[0],
+          email,
+          password: hashedPassword,
+        },
+      })
+
+      await tx.subscription.create({
+        data: {
+          userId: user.id,
+          plan: "free",
+          status: "active",
+        },
+      })
+
+      return user
     })
 
-    await prisma.subscription.create({
-      data: {
-        userId: user.id,
-        plan: "free",
-        status: "active",
-      },
-    })
-
-    return NextResponse.json({ id: user.id, email: user.email }, { status: 201 })
+    return NextResponse.json({ id: result.id, email: result.email }, { status: 201 })
   } catch (e) {
     console.error("Register error:", e)
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })

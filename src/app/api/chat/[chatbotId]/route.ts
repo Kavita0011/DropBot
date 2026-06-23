@@ -6,7 +6,13 @@ import { checkChatLimit } from "@/lib/plans"
 export async function POST(req: Request, { params }: { params: Promise<{ chatbotId: string }> }) {
   try {
     const { chatbotId } = await params
-    const { message, history = [] } = await req.json()
+    const { message, history = [], visitorId: rawVisitorId } = await req.json()
+
+    if (!message || typeof message !== "string" || message.length > 2000) {
+      return NextResponse.json({ error: "Invalid message" }, { status: 400 })
+    }
+
+    const visitorId = rawVisitorId || crypto.randomUUID()
 
     const chatbot = await prisma.chatbot.findFirst({
       where: { id: chatbotId, status: "approved" },
@@ -16,8 +22,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
       return NextResponse.json({ error: "Chatbot not found" }, { status: 404 })
     }
 
-    const userId = chatbot.userId
-    const limitCheck = await checkChatLimit(userId)
+    const ownerId = chatbot.userId
+    const limitCheck = await checkChatLimit(ownerId)
     if (!limitCheck.allowed) {
       return NextResponse.json({ error: limitCheck.error }, { status: 429 })
     }
@@ -26,12 +32,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
     const reply = await generateChatReply(chatbotId, message, history, flowData)
 
     const dateStr = new Date().toISOString().split("T")[0]
-    const sessionId = `session-${chatbotId}-${dateStr}-${userId}`
+    const sessionId = `session-${chatbotId}-${dateStr}-${visitorId}`
 
     let session = await prisma.chatSession.upsert({
       where: { id: sessionId },
       update: {},
-      create: { id: sessionId, chatbotId, userId },
+      create: { id: sessionId, chatbotId, userId: ownerId },
     })
 
     await prisma.message.createMany({
@@ -41,7 +47,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
       ],
     })
 
-    return NextResponse.json({ reply: reply.reply, nodeId: reply.nodeId })
+    return NextResponse.json({ reply: reply.reply, nodeId: reply.nodeId, visitorId })
   } catch {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }

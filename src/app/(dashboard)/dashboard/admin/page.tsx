@@ -171,7 +171,7 @@ export default function AdminPage() {
     if (!confirm("Delete this plan?")) return
     const res = await fetch("/api/admin/plans", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
     if (res.ok) { toast.success("Plan deleted"); setPlans((prev) => prev.filter((p) => p.id !== id)) }
-    else toast.error("Failed to delete plan")
+    else { const e = await res.json(); toast.error(e.error || "Failed to delete plan") }
   }
 
   const filteredUsers = useMemo(() => {

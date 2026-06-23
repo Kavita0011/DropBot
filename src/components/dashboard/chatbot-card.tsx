@@ -23,18 +23,23 @@ export function ChatbotCard({ chatbot }: ChatbotCardProps) {
   const handleDelete = async () => {
     if (!confirm("Delete this chatbot? This cannot be undone.")) return
     setDeleting(true)
-    const res = await fetch(`/api/chatbots/${chatbot.id}`, { method: "DELETE" })
-    if (res.ok) { toast.success("Deleted!"); router.refresh() }
-    else toast.error("Failed to delete")
-    setDeleting(false)
+    try {
+      const res = await fetch(`/api/chatbots/${chatbot.id}`, { method: "DELETE" })
+      if (res.ok) { toast.success("Deleted!"); router.refresh() }
+      else toast.error("Failed to delete")
+    } catch {
+      toast.error("Network error — please try again")
+    } finally {
+      setDeleting(false)
+    }
   }
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-            <Bot className="h-5 w-5 text-blue-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+            <Bot className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
             <CardTitle className="text-base">{chatbot.name}</CardTitle>

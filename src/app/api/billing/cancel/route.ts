@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { stripe } from "@/lib/stripe"
 
 export async function POST() {
   const session = await auth()
@@ -14,6 +15,12 @@ export async function POST() {
   })
   if (!sub) {
     return NextResponse.json({ error: "No active subscription" }, { status: 404 })
+  }
+
+  if (sub.stripeSubscriptionId && stripe) {
+    await stripe.subscriptions.update(sub.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    })
   }
 
   await prisma.subscription.update({

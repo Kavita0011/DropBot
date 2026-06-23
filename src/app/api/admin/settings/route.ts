@@ -21,8 +21,8 @@ export async function PUT(req: Request) {
   const body = await req.json()
   const settings = await prisma.platformSettings.upsert({
     where: { id: "platform" },
-    update: {},
-    create: { id: "platform" },
+    update: body,
+    create: { id: "platform", ...body },
   })
 
   return NextResponse.json(settings)

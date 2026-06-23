@@ -33,13 +33,16 @@ interface ChatbotStore {
   setNodes: (nodes: FlowNode[]) => void
   setEdges: (edges: FlowEdge[]) => void
   addNode: (node: FlowNode) => void
-  updateNode: (id: string, data: Partial<FlowNode>) => void
+  updateNode: (id: string, data: Partial<FlowNode>, skipHistory?: boolean) => void
+  commitHistory: () => void
   updateNodePosition: (id: string, x: number, y: number) => void
   removeNode: (id: string) => void
   removeSelectedNodes: () => void
   addEdge: (edge: FlowEdge) => void
   removeEdge: (id: string) => void
+  updateEdge: (id: string, data: Partial<FlowEdge>) => void
   selectNode: (id: string | null) => void
+  selectMultipleNodes: (ids: string[]) => void
   toggleNodeSelection: (id: string) => void
   selectEdge: (id: string | null) => void
   duplicateNode: (id: string) => void
@@ -73,8 +76,10 @@ const initialNodes: FlowNode[] = [
   },
 ]
 
+function cc<T>(v: T): T { return structuredClone(v) }
+
 function snapshot(get: () => ChatbotStore): HistoryEntry {
-  return { nodes: JSON.parse(JSON.stringify(get().nodes)), edges: JSON.parse(JSON.stringify(get().edges)) }
+  return { nodes: cc(get().nodes), edges: cc(get().edges) }
 }
 
 function pushHistory(set: any, get: () => ChatbotStore) {
@@ -111,7 +116,8 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
   addNode: (node) => { pushHistory(set, get); set((s) => ({ nodes: [...s.nodes, node] })) },
-  updateNode: (id, data) => { pushHistory(set, get); set((s) => ({ nodes: s.nodes.map((n) => (n.id === id ? { ...n, ...data } : n)) })) },
+  updateNode: (id, data, skipHistory) => { if (!skipHistory) pushHistory(set, get); set((s) => ({ nodes: s.nodes.map((n) => (n.id === id ? { ...n, ...data } : n)) })) },
+  commitHistory: () => pushHistory(set, get),
   updateNodePosition: (id, x, y) => set((s) => ({ nodes: s.nodes.map((n) => (n.id === id ? { ...n, position: { x, y } } : n)) })),
   removeNode: (id) => { pushHistory(set, get); set((s) => ({ nodes: s.nodes.filter((n) => n.id !== id), edges: s.edges.filter((e) => e.source !== id && e.target !== id), selectedNodeId: s.selectedNodeId === id ? null : s.selectedNodeId, selectedNodeIds: s.selectedNodeIds.filter((nid) => nid !== id) })) },
   removeSelectedNodes: () => {
@@ -128,7 +134,9 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
     set((state) => ({ edges: [...state.edges, edge] }))
   },
   removeEdge: (id) => { pushHistory(set, get); set((s) => ({ edges: s.edges.filter((e) => e.id !== id), selectedEdgeId: s.selectedEdgeId === id ? null : s.selectedEdgeId })) },
+  updateEdge: (id, data) => { pushHistory(set, get); set((s) => ({ edges: s.edges.map((e) => (e.id === id ? { ...e, ...data } : e)) })) },
   selectNode: (id) => set({ selectedNodeId: id, selectedEdgeId: null, selectedNodeIds: id ? [id] : [] }),
+  selectMultipleNodes: (ids) => set({ selectedNodeIds: ids, selectedNodeId: ids.length === 1 ? ids[0] : (ids.length > 0 ? ids[0] : null), selectedEdgeId: null }),
   toggleNodeSelection: (id) => set((s) => {
     const exists = s.selectedNodeIds.includes(id)
     const newIds = exists ? s.selectedNodeIds.filter((nid) => nid !== id) : [...s.selectedNodeIds, id]
@@ -140,14 +148,14 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
     const node = s.nodes.find((n) => n.id === id)
     if (!node) return
     pushHistory(set, get)
-    const newNode: FlowNode = { ...JSON.parse(JSON.stringify(node)), id: generateId(), position: { x: node.position.x + 40, y: node.position.y + 60 } }
+    const newNode: FlowNode = { ...cc(node), id: generateId(), position: { x: node.position.x + 40, y: node.position.y + 60 } }
     set((state) => ({ nodes: [...state.nodes, newNode] }))
   },
   copyNodes: () => {
     const s = get()
     const ids = s.selectedNodeIds.length > 0 ? s.selectedNodeIds : (s.selectedNodeId ? [s.selectedNodeId] : [])
     if (ids.length === 0) return
-    const copied = s.nodes.filter((n) => ids.includes(n.id)).map((n) => ({ ...JSON.parse(JSON.stringify(n)), id: generateId() }))
+    const copied = s.nodes.filter((n) => ids.includes(n.id)).map((n) => ({ ...cc(n), id: generateId() }))
     set({ clipboard: copied })
   },
   pasteNodes: (x?: number, y?: number) => {
@@ -177,13 +185,13 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
     const s = get()
     if (s.past.length === 0) return
     const prev = s.past[s.past.length - 1]
-    set((state) => ({ past: state.past.slice(0, -1), future: [{ nodes: JSON.parse(JSON.stringify(state.nodes)), edges: JSON.parse(JSON.stringify(state.edges)) }, ...state.future], nodes: prev.nodes, edges: prev.edges }))
+    set((state) => ({ past: state.past.slice(0, -1), future: [{ nodes: cc(state.nodes), edges: cc(state.edges) }, ...state.future], nodes: prev.nodes, edges: prev.edges }))
   },
   redo: () => {
     const s = get()
     if (s.future.length === 0) return
     const next = s.future[0]
-    set((state) => ({ past: [...state.past, { nodes: JSON.parse(JSON.stringify(state.nodes)), edges: JSON.parse(JSON.stringify(state.edges)) }], future: state.future.slice(1), nodes: next.nodes, edges: next.edges }))
+    set((state) => ({ past: [...state.past, { nodes: cc(state.nodes), edges: cc(state.edges) }], future: state.future.slice(1), nodes: next.nodes, edges: next.edges }))
   },
   reset: () => set({
     nodes: initialNodes, edges: [], selectedNodeId: null, selectedNodeIds: [], selectedEdgeId: null, past: [], future: [], clipboard: null, showGrid: true, snapToGrid: true,
@@ -191,8 +199,12 @@ export const useChatbotStore = create<ChatbotStore>((set, get) => ({
     themeColor: "#3b82f6", accentColor: "#1d4ed8", position: "bottom-right", bgColor: "#ffffff", textColor: "#1f2937", status: "draft", logoUrl: "",
   }),
   loadFromFlowData: (flowData, fields) => {
-    const parsed = JSON.parse(flowData)
-    set({ nodes: parsed.nodes || initialNodes, edges: parsed.edges || [], selectedNodeId: null, selectedNodeIds: [], selectedEdgeId: null, past: [], future: [], ...(fields || {}) })
+    try {
+      const parsed = JSON.parse(flowData)
+      set({ nodes: parsed.nodes || initialNodes, edges: parsed.edges || [], selectedNodeId: null, selectedNodeIds: [], selectedEdgeId: null, past: [], future: [], ...(fields || {}) })
+    } catch {
+      set({ nodes: initialNodes, edges: [], selectedNodeId: null, selectedNodeIds: [], selectedEdgeId: null, past: [], future: [], ...(fields || {}) })
+    }
   },
   toFlowData: () => {
     const { nodes, edges } = get()

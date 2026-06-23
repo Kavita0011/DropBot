@@ -86,9 +86,10 @@ async function main() {
   ]
 
   for (const p of plans) {
+    const { priceId, ...rest } = p
     await prisma.plan.upsert({
       where: { key: p.key },
-      update: p,
+      update: priceId ? p : rest,
       create: p,
     })
   }

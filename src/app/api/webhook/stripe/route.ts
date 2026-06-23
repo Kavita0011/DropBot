@@ -107,6 +107,7 @@ export async function POST(req: Request) {
     }
   } catch (e) {
     console.error("Webhook handler error:", e)
+    return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })

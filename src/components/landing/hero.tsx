@@ -11,18 +11,18 @@ export function Hero() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 animate-fade-in">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 px-4 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300 animate-fade-in">
             <Sparkles className="h-4 w-4" /> AI-Powered Chatbot Builder
           </div>
 
-          <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl leading-[1.1]">
+          <h1 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-7xl leading-[1.1]">
             Build Intelligent Chatbots with{" "}
             <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text text-transparent">
               Drag & Drop
             </span>
           </h1>
 
-          <p className="mt-6 text-lg sm:text-xl leading-relaxed text-gray-500 max-w-2xl mx-auto">
+          <p className="mt-6 text-lg sm:text-xl leading-relaxed text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
             Create powerful AI chatbots in minutes — no coding required. Design conversational flows visually,
             customize every detail, and embed on your website with one line of code.
           </p>

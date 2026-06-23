@@ -9,6 +9,11 @@ async function getPlanLimitsFromDb(planKey: string) {
 }
 
 export async function getPlanLimits(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } })
+  if (user?.role === "admin") {
+    return { chatbots: -1, nodes: -1, chats: -1, name: "Admin", price: 0 }
+  }
+
   const subscription = await prisma.subscription.findFirst({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -62,18 +67,26 @@ export async function checkChatLimit(userId: string): Promise<{ allowed: boolean
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const chatCount = await prisma.chatSession.count({
-    where: { userId, createdAt: { gte: today } },
+  const chatCount = await prisma.message.count({
+    where: {
+      session: { userId },
+      createdAt: { gte: today },
+    },
   })
 
   if (chatCount >= limits.chats) {
-    return { allowed: false, error: `Daily chat limit reached (${limits.chats}). Upgrade for more.` }
+    return { allowed: false, error: `Daily chat limit reached (${limits.chats} messages). Upgrade for more.` }
   }
 
   return { allowed: true }
 }
 
 export async function getCurrentPlan(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } })
+  if (user?.role === "admin") {
+    return { plan: "business", limits: { chatbots: -1, nodes: -1, chats: -1 } }
+  }
+
   const limits = await getPlanLimits(userId)
   const subscription = await prisma.subscription.findFirst({
     where: { userId },

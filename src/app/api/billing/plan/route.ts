@@ -1,14 +1,41 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { PLANS } from "@/lib/stripe"
 
 const GRACE_DAYS = 5
+
+const ADMIN_PLAN = {
+  key: "business",
+  name: "Business",
+  price: 0,
+  limits: { chatbots: -1, nodes: -1, chats: -1 },
+}
 
 export async function GET() {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const isAdmin = (session?.user as { role?: string })?.role === "admin"
+
+  if (isAdmin) {
+    const plans = await prisma.plan.findMany({ where: { active: true }, orderBy: { price: "asc" } })
+    const payments = await prisma.payment.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    })
+    return NextResponse.json({
+      subscription: null,
+      payments,
+      currentPlan: ADMIN_PLAN,
+      plans,
+      subscriptionEnd: null,
+      graceEnd: null,
+      inGrace: false,
+      isAdmin: true,
+    })
   }
 
   let subscription = await prisma.subscription.findFirst({
@@ -39,26 +66,23 @@ export async function GET() {
 
   const inGrace = subscription?.subscriptionEnd && new Date(subscription.subscriptionEnd) < now && subscription?.graceEnd && new Date(subscription.graceEnd) > now
   const effectiveStatus = inGrace ? "active" : subscription?.status
-  const planKey = (effectiveStatus === "active" ? subscription?.plan : "free") as keyof typeof PLANS
-  const plan = PLANS[planKey] || PLANS.free
+  const plan = await prisma.plan.findUnique({ where: { key: (effectiveStatus === "active" ? subscription?.plan : "free") || "free" } })
+  const planKey = plan?.key || "free"
 
   return NextResponse.json({
     subscription: subscription || null,
     payments,
     currentPlan: {
       key: planKey,
-      name: plan.name,
-      price: plan.price,
-      limits: {
-        chatbots: plan.chatbots,
-        nodes: plan.nodes,
-        chats: plan.chats,
-      },
+      name: plan?.name || "Free",
+      price: plan?.price || 0,
+      limits: { chatbots: plan?.chatbots || 1, nodes: plan?.nodes || 10, chats: plan?.chats || 100 },
     },
     plans,
     subscriptionEnd: subscription?.subscriptionEnd || null,
     graceEnd: subscription?.graceEnd || null,
     inGrace: inGrace || false,
+    isAdmin: false,
   })
 }
 
@@ -72,6 +96,7 @@ export async function POST() {
     where: {
       status: "active",
       subscriptionEnd: { not: null, lt: new Date() },
+      user: { role: { not: "admin" } },
     },
   })
 

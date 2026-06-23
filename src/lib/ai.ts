@@ -81,7 +81,12 @@ export async function generateChatReply(
 ): Promise<{ reply: string; nodeId: string | null }> {
   const { nodes, edges } = flowData
 
-  const aiReply = await getAIReply(buildConversationContext(nodes, edges, userMessage, history))
+  let aiReply: string | null = null
+  try {
+    aiReply = await getAIReply(buildConversationContext(nodes, edges, userMessage, history))
+  } catch (e) {
+    console.error("AI reply error:", e)
+  }
 
   if (aiReply) {
     return { reply: aiReply, nodeId: null }

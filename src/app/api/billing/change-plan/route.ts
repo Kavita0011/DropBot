@@ -18,6 +18,14 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Invalid or inactive plan" }, { status: 400 })
   }
 
+  const isAdmin = (session?.user as { role?: string })?.role === "admin"
+
+  // Non-admin users can only downgrade to free (cancel subscription)
+  // Admin can switch to any plan without payment
+  if (!isAdmin && planKey !== "free") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
+
   const sub = await prisma.subscription.findFirst({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },

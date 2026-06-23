@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(req: Request, { params }: { params: Promise<{ chatbotId: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ chatbotId: string }> }) {
   const { chatbotId } = await params
   const chatbot = await prisma.chatbot.findFirst({
     where: { id: chatbotId },
     select: { themeColor: true, position: true, name: true },
   })
   if (!chatbot) {
+    const dashboardUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin
     const script = `(function(){
   var btn=document.createElement("div");
-  btn.innerHTML='<div style="position:fixed;right:20px;bottom:20px;z-index:99999;font-family:system-ui,sans-serif"><a href="${process.env.NEXT_PUBLIC_APP_URL || "https://drop-bot-ebon.vercel.app"}/dashboard/chatbots" target="_blank" style="display:flex;align-items:center;gap:8px;background:#2563eb;color:white;padding:12px 20px;border-radius:12px;text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(37,99,235,0.35)">\\u26A1 Create Your Chatbot</a></div>';
+  btn.innerHTML='<div style="position:fixed;right:20px;bottom:20px;z-index:99999;font-family:system-ui,sans-serif"><a href="${dashboardUrl}/dashboard/chatbots" target="_blank" style="display:flex;align-items:center;gap:8px;background:#2563eb;color:white;padding:12px 20px;border-radius:12px;text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(37,99,235,0.35)">\\u26A1 Create Your Chatbot</a></div>';
   document.body.appendChild(btn);
 })()`
     return new NextResponse(script, {
@@ -18,7 +19,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chatbotI
     })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${req.headers.get("x-forwarded-proto") || "https"}://${req.headers.get("host")}`
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin
   const position = chatbot.position === "bottom-left" ? "left:20px" : "right:20px"
   const color = chatbot.themeColor || "#2563eb"
 

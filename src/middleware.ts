@@ -3,12 +3,20 @@ import type { NextRequest } from "next/server"
 
 const rateLimit = new Map<string, { count: number; reset: number }>()
 
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, entry] of rateLimit) {
+    if (now > entry.reset) rateLimit.delete(key)
+  }
+}, 60000)
+
 function isRateLimited(key: string, maxRequests: number, windowMs: number): boolean {
   const now = Date.now()
-  const entry = rateLimit.get(key)
+  let entry = rateLimit.get(key)
 
   if (!entry || now > entry.reset) {
-    rateLimit.set(key, { count: 1, reset: now + windowMs })
+    entry = { count: 1, reset: now + windowMs }
+    rateLimit.set(key, entry)
     return false
   }
 

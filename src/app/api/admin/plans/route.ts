@@ -55,7 +55,7 @@ export async function DELETE(req: Request) {
   const plan = await prisma.plan.findUnique({ where: { id }, select: { key: true } })
   if (!plan) return NextResponse.json({ error: "Plan not found" }, { status: 404 })
 
-  const inUse = await prisma.subscription.findFirst({ where: { plan: plan.key } })
+  const inUse = await prisma.subscription.findFirst({ where: { plan: plan.key, status: "active" } })
   if (inUse) {
     return NextResponse.json({ error: "Cannot delete — plan is assigned to active subscriptions" }, { status: 409 })
   }

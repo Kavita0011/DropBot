@@ -36,40 +36,44 @@ export async function POST(req: Request) {
   const subEnd = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000)
   const graceEnd = new Date(subEnd.getTime() + 5 * 24 * 60 * 60 * 1000)
 
-  await prisma.payment.create({
-    data: {
-      userId: session.user.id,
-      amount: plan.priceInr || plan.price,
-      currency: "inr",
-      status: "completed",
-      method: "razorpay",
-      planKey,
-      email: user?.email || "",
-      phone: phone || "",
-      gst: gst || "",
-      address: address || "",
-      razorpayPaymentId: razorpay_payment_id,
-      razorpayOrderId: razorpay_order_id,
-    },
-  })
+  const usdAmount = plan.priceInr ? 0 : plan.price
 
-  if (existingSub) {
-    await prisma.subscription.update({
-      where: { id: existingSub.id },
-      data: { plan: planKey, status: "active", subscriptionEnd: subEnd, graceEnd },
-    })
-  } else {
-    await prisma.subscription.create({
+  await prisma.$transaction(async (tx) => {
+    await tx.payment.create({
       data: {
-        id: `sub-${session.user.id}-${Date.now()}`,
         userId: session.user.id,
-        plan: planKey,
-        status: "active",
-        subscriptionEnd: subEnd,
-        graceEnd,
+        amount: usdAmount || plan.priceInr,
+        currency: usdAmount ? "usd" : "inr",
+        status: "completed",
+        method: "razorpay",
+        planKey,
+        email: user?.email || "",
+        phone: phone || "",
+        gst: gst || "",
+        address: address || "",
+        razorpayPaymentId: razorpay_payment_id,
+        razorpayOrderId: razorpay_order_id,
       },
     })
-  }
+
+    if (existingSub) {
+      await tx.subscription.update({
+        where: { id: existingSub.id },
+        data: { plan: planKey, status: "active", subscriptionEnd: subEnd, graceEnd },
+      })
+    } else {
+      await tx.subscription.create({
+        data: {
+          id: `sub-${session.user.id}-${Date.now()}`,
+          userId: session.user.id,
+          plan: planKey,
+          status: "active",
+          subscriptionEnd: subEnd,
+          graceEnd,
+        },
+      })
+    }
+  })
 
   return NextResponse.json({ success: true, planKey, subscriptionEnd: subEnd.toISOString(), graceEnd: graceEnd.toISOString() })
 }

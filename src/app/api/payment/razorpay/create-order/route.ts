@@ -47,6 +47,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Razorpay not configured — API request failed" }, { status: 503 })
   }
 
+  await prisma.payment.create({
+    data: {
+      userId: session.user.id,
+      amount: plan.priceInr,
+      currency: "inr",
+      status: "pending",
+      method: "razorpay",
+      planKey,
+      email: user?.email || "",
+      phone: phone || "",
+      gst: gst || "",
+      address: address || "",
+      razorpayOrderId: result.id,
+    },
+  })
+
   return NextResponse.json({
     order_id: result.id,
     amount: result.amount,

@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <p><strong>Last updated:</strong> June 16, 2026</p>
 
         <h2 className="text-xl font-semibold mt-8">1. Information We Collect</h2>
-        <p>We collect information you provide when creating an account, including your name, email address, and billing information (processed by Stripe, not stored by us).</p>
+        <p>We collect information you provide when creating an account, including your name, email address, and billing information (processed by Razorpay, not stored by us).</p>
         <p>We also collect usage data such as chatbot interactions, page views, and feature usage to improve our Service.</p>
 
         <h2 className="text-xl font-semibold mt-8">2. How We Use Your Information</h2>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
         <h2 className="text-xl font-semibold mt-8">4. Third-Party Services</h2>
         <p>We use the following third-party services:</p>
         <ul className="list-disc pl-6 space-y-1">
-          <li><strong>Stripe</strong> — payment processing (see their <a href="https://stripe.com/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>)</li>
+          <li><strong>Razorpay</strong> — payment processing (see their <a href="https://razorpay.com/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>)</li>
           <li><strong>OpenAI</strong> — AI chatbot responses (if enabled)</li>
           <li><strong>Neon</strong> — database hosting</li>
         </ul>

@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
   const chatSession = await prisma.chatSession.findUnique({
     where: { id: sessionId },
     include: {
-      messages: { orderBy: { createdAt: "asc" } },
+      messages: { orderBy: { createdAt: "asc" }, take: 200 },
       chatbot: { select: { userId: true } },
     },
   })

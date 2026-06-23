@@ -1,4 +1,4 @@
-import { createHmac } from "crypto"
+import { createHmac, timingSafeEqual } from "crypto"
 
 interface RazorpayOrderResult {
   id: string; amount: number; amount_due: number; amount_paid: number
@@ -42,8 +42,14 @@ export async function createOrder(amount: number, currency: string, receipt: str
 export function verifyPayment(orderId: string, paymentId: string, signature: string) {
   const auth = getAuth()
   if (!auth) return false
-  const expected = createHmac("sha256", auth.key_secret).update(`${orderId}|${paymentId}`).digest("hex")
-  return expected === signature
+  const expected = createHmac("sha256", auth.key_secret).update(`${orderId}|${paymentId}`).digest()
+  const sig = Buffer.from(signature, "hex")
+  if (expected.length !== sig.length) return false
+  return timingSafeEqual(expected, sig)
+}
+
+export async function refundPayment(paymentId: string, amount?: number) {
+  return razorpayPost(`/payments/${paymentId}/refund`, amount ? { amount } : {})
 }
 
 export function getKeyId() {

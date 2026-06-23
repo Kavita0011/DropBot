@@ -3,6 +3,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -10,11 +14,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface: #ffffff;
+  --muted: #f9fafb;
+  --card: #ffffff;
+  --card-hover: #f9fafb;
 }
 
 .dark {
   --background: #0b1120;
   --foreground: #e2e8f0;
+  --surface: #0f172a;
+  --muted: #1e293b;
+  --card: #1e293b;
+  --card-hover: #334155;
 }
 
 body {
@@ -36,3 +48,14 @@ body {
   * { @apply border-gray-200; }
   .dark * { @apply border-gray-700/60; }
 }
+
+.dark .text-gray-900 { color: #f1f5f9; }
+.dark .text-gray-800 { color: #e2e8f0; }
+.dark .text-gray-700 { color: #cbd5e1; }
+.dark .text-gray-600 { color: #94a3b8; }
+.dark .text-gray-500 { color: #64748b; }
+.dark .text-gray-400 { color: #475569; }
+.dark .text-gray-300 { color: #334155; }
+
+.dark thead tr { background-color: #1e293b; }
+.dark tr.bg-gray-50 { background-color: #1e293b; }

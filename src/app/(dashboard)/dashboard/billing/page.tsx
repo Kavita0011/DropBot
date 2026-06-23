@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Check, Loader2, Clock, AlertCircle, IndianRupee, Zap, FileText, Ban,
   ShieldCheck, MessageSquare, GitBranch, Users, Sparkles, ArrowRight,
-  CalendarDays, CreditCard, ChevronRight, Receipt
+  CalendarDays, CreditCard, ChevronRight, Receipt, DollarSign
 } from "lucide-react"
 import toast from "react-hot-toast"
 
@@ -19,7 +19,7 @@ interface Plan {
 interface BillingData {
   currentPlan: { key: string; name: string; price: number; limits: Record<string, number> }
   subscription: { stripeSubscriptionId: string | null; subscriptionEnd: string | null; graceEnd: string | null; plan: string; status: string } | null
-  payments: any[]; subscriptionEnd: string | null; graceEnd: string | null; inGrace: boolean
+  payments: any[]; subscriptionEnd: string | null; graceEnd: string | null; inGrace: boolean; isAdmin?: boolean
 }
 
 interface UsageData { totalChatbots: number; totalNodes: number; totalChats: number; plan: string; planLimit: number }
@@ -37,9 +37,9 @@ function formatUsd(cents: number) {
 type PlanKey = "free" | "pro" | "business"
 
 const PLAN_COLORS: Record<PlanKey, { border: string; gradient: string; accent: string; btn: string }> = {
-  free: { border: "border-gray-200", gradient: "from-gray-50 to-white", accent: "bg-gray-50", btn: "" },
-  pro: { border: "border-blue-200", gradient: "from-blue-50 via-white to-white", accent: "bg-blue-50", btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25" },
-  business: { border: "border-purple-200", gradient: "from-purple-50 via-white to-white", accent: "bg-purple-50", btn: "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/25" },
+  free: { border: "border-gray-200 dark:border-gray-700/60", gradient: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-900", accent: "bg-gray-50 dark:bg-gray-800", btn: "" },
+  pro: { border: "border-blue-200 dark:border-blue-800", gradient: "from-blue-50 via-white to-white dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900", accent: "bg-blue-50 dark:bg-blue-900/30", btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25" },
+  business: { border: "border-purple-200 dark:border-purple-800", gradient: "from-purple-50 via-white to-white dark:from-purple-950/30 dark:via-gray-900 dark:to-gray-900", accent: "bg-purple-50 dark:bg-purple-900/30", btn: "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/25" },
 }
 
 export default function BillingPage() {
@@ -127,10 +127,13 @@ export default function BillingPage() {
   const currentKey = (billing?.currentPlan?.key || "free") as PlanKey
   const subEnd = billing?.subscriptionEnd
   const isExpired = subEnd && new Date(subEnd) < new Date()
+  const isAdminUser = billing?.isAdmin
   const isActive = billing?.subscription?.status === "active" && currentKey !== "free"
   const colors = PLAN_COLORS[currentKey] || PLAN_COLORS.free
 
-  const statusConfig = isActive
+  const statusConfig = isAdminUser
+    ? { label: "Active", variant: "success" as const, icon: Zap }
+    : isActive
     ? { label: "Active", variant: "success" as const, icon: Zap }
     : billing?.inGrace
     ? { label: "Grace Period", variant: "warning" as const, icon: Clock }
@@ -154,7 +157,7 @@ export default function BillingPage() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="h-8 w-1 rounded-full bg-gradient-to-b from-blue-500 to-purple-500" />
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Billing</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Billing</h1>
           </div>
           <p className="text-sm text-gray-500 ml-4">Manage your plan, subscription and payment history</p>
         </div>
@@ -166,11 +169,11 @@ export default function BillingPage() {
         )}
       </div>
 
-      <div className={`relative overflow-hidden rounded-2xl border ${colors.border} bg-gradient-to-r ${colors.gradient} p-[1px]`}>
-        <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-6 sm:p-8">
+        <div className={`relative overflow-hidden rounded-2xl border ${colors.border} bg-gradient-to-r ${colors.gradient} p-[1px]`}>
+        <div className="rounded-2xl bg-card/80 backdrop-blur-sm p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-start gap-5">
-              <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${isActive ? "bg-blue-50" : "bg-gray-50"}`}>
+              <div className={`relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${isActive ? "bg-blue-50 dark:bg-blue-900/30" : "bg-muted"}`}>
                 <div className={`absolute inset-0 rounded-2xl ${isActive ? "bg-gradient-to-br from-blue-400/20 to-purple-400/20" : ""}`} />
                 {isActive ? <Zap className="h-8 w-8 text-blue-600" /> : currentKey === "free" ? <Sparkles className="h-8 w-8 text-gray-400" /> : <Clock className="h-8 w-8 text-amber-500" />}
               </div>
@@ -218,7 +221,7 @@ export default function BillingPage() {
                 const limit = item.limit === -1 ? Infinity : item.limit
                 const pct = limit === Infinity ? 0 : Math.min(100, Math.round((item.used / limit) * 100))
                 return (
-                  <div key={item.label} className="rounded-xl bg-white border border-gray-100 p-4 hover:border-gray-200 transition-colors">
+                  <div key={item.label} className="rounded-xl bg-card border border-gray-100 dark:border-gray-700/60 p-4 hover:border-gray-200 dark:hover:border-gray-600 transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <item.icon className="h-4 w-4 text-gray-400" />
@@ -230,7 +233,7 @@ export default function BillingPage() {
                       </span>
                     </div>
                     {limit !== Infinity && (
-                      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-700 ease-out ${pct > 90 ? "bg-red-500" : pct > 70 ? "bg-amber-500" : item.color}`}
                           style={{ width: `${pct}%` }}
@@ -254,16 +257,16 @@ export default function BillingPage() {
         {loading ? (
           <div className="grid gap-6 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-gray-100 bg-white p-8 space-y-6">
+              <div key={i} className="rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-card p-8 space-y-6">
                 <div className="space-y-3">
-                  <div className="h-5 w-20 bg-gray-100 rounded-full animate-pulse" />
-                  <div className="h-10 w-32 bg-gray-100 rounded-lg animate-pulse" />
-                  <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-5 w-20 bg-muted rounded-full animate-pulse" />
+                  <div className="h-10 w-32 bg-muted rounded-lg animate-pulse" />
+                  <div className="h-4 w-24 bg-muted rounded animate-pulse" />
                 </div>
                 <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, j) => <div key={j} className="h-4 w-full bg-gray-100 rounded animate-pulse" />)}
+                  {Array.from({ length: 5 }).map((_, j) => <div key={j} className="h-4 w-full bg-muted rounded animate-pulse" />)}
                 </div>
-                <div className="h-12 w-full bg-gray-100 rounded-xl animate-pulse" />
+                <div className="h-12 w-full bg-muted rounded-xl animate-pulse" />
               </div>
             ))}
           </div>
@@ -279,7 +282,7 @@ export default function BillingPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col rounded-2xl border bg-white transition-all duration-300 ${
+                  className={`relative flex flex-col rounded-2xl border bg-card transition-all duration-300 ${
                     isCurrent
                       ? `${pc.border} ring-2 ring-blue-500/20 shadow-lg`
                       : `${pc.border} hover:-translate-y-1 hover:shadow-xl`
@@ -304,7 +307,11 @@ export default function BillingPage() {
                     <div className="mb-6">
                       <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
                       <div className="mt-4">
-                        {plan.priceInr > 0 ? (
+                    {billing?.isAdmin ? (
+                      <Button className="w-full h-12 rounded-xl" variant="outline" disabled>
+                        {isCurrent ? "Current Plan" : "Admin Only"}
+                      </Button>
+                    ) : plan.priceInr > 0 ? (
                           <div className="space-y-1">
                             <div className="flex items-baseline gap-1.5">
                               <span className="text-5xl font-extrabold tracking-tight text-gray-900">
@@ -335,7 +342,11 @@ export default function BillingPage() {
                       ))}
                     </div>
 
-                    {plan.priceInr > 0 ? (
+                    {billing?.isAdmin ? (
+                      <Button className="w-full h-12 rounded-xl" variant="outline" disabled>
+                        {isCurrent ? "Current Plan" : "Admin Only"}
+                      </Button>
+                    ) : plan.priceInr > 0 ? (
                       <Button
                         className={`w-full h-12 rounded-xl font-semibold text-sm transition-all ${
                           isCurrent
@@ -388,21 +399,21 @@ export default function BillingPage() {
             <h2 className="text-lg font-semibold text-gray-900">Payment History</h2>
           </div>
 
-          <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden">
+          <div className="rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-card overflow-hidden">
             {billing.payments.map((p: any, idx: number) => (
               <div
                 key={p.id}
-                className={`flex items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50/80 ${
-                  idx !== billing.payments.length - 1 ? "border-b border-gray-50" : ""
+                className={`flex items-center justify-between px-6 py-4 transition-colors hover:bg-card-hover ${
+                  idx !== billing.payments.length - 1 ? "border-b border-gray-100 dark:border-gray-700/60" : ""
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    p.status === "completed" ? "bg-green-50" : "bg-gray-50"
+                    p.status === "completed" ? "bg-green-50 dark:bg-green-900/30" : "bg-muted"
                   }`}>
                     {p.currency === "inr"
                       ? <IndianRupee className={`h-5 w-5 ${p.status === "completed" ? "text-green-600" : "text-gray-400"}`} />
-                      : <IndianRupee className={`h-5 w-5 ${p.status === "completed" ? "text-green-600" : "text-gray-400"}`} />
+                      : <DollarSign className={`h-5 w-5 ${p.status === "completed" ? "text-green-600" : "text-gray-400"}`} />
                     }
                   </div>
                   <div>
@@ -438,10 +449,10 @@ export default function BillingPage() {
       )}
 
       {!loading && (!billing?.payments || billing.payments.length === 0) && billing?.currentPlan?.key !== "free" && (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center">
-          <Receipt className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm font-medium text-gray-500">No payment history yet</p>
-          <p className="text-xs text-gray-400 mt-1">Payments will appear here after your first subscription</p>
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700/60 bg-muted/50 p-8 text-center">
+          <Receipt className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No payment history yet</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Payments will appear here after your first subscription</p>
         </div>
       )}
     </div>

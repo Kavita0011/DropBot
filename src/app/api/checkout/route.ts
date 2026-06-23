@@ -18,6 +18,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing priceId" }, { status: 400 })
   }
 
+  const plan = await prisma.plan.findFirst({ where: { priceId } })
+  if (!plan) {
+    return NextResponse.json({ error: "Invalid price ID — no matching plan" }, { status: 400 })
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
   })

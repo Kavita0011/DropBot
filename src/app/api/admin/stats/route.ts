@@ -25,20 +25,21 @@ export async function GET() {
     select: { id: true, name: true, userId: true, createdAt: true },
   })
 
-  const payments = await prisma.payment.findMany()
-
-  const totalRevenue = payments
-    .filter((p) => p.status === "completed")
-    .reduce((sum, p) => sum + p.amount, 0)
-
-  const totalUsers = await prisma.user.count()
-  const totalChatbots = await prisma.chatbot.count()
+  const [paymentAgg, totalUsers, totalChatbots] = await Promise.all([
+    prisma.payment.aggregate({
+      where: { status: "completed" },
+      _sum: { amount: true },
+      _count: true,
+    }),
+    prisma.user.count(),
+    prisma.chatbot.count(),
+  ])
 
   return NextResponse.json({
     totalUsers,
     totalChatbots,
-    totalPayments: payments.length,
-    totalRevenue: totalRevenue / 100,
+    totalPayments: paymentAgg._count,
+    totalRevenue: (paymentAgg._sum.amount || 0) / 100,
     recentUsers: allUsers,
     recentChatbots: allChatbots,
   })

@@ -19,7 +19,7 @@ export async function GET() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const monthRevenue = payments.filter((p) => p.status === "completed" && p.createdAt >= monthStart).reduce((s, p) => s + p.amount, 0)
 
-  const pendingPayouts = payments.filter((p) => p.status === "completed" && !p.stripePaymentId).reduce((s, p) => s + p.amount, 0)
+  const pendingPayouts = payments.filter((p) => p.status === "completed" && !p.stripePaymentId && !p.razorpayPaymentId).reduce((s, p) => s + p.amount, 0)
 
   const monthlyBreakdown = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
