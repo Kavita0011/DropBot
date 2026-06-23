@@ -188,7 +188,7 @@ export function ChatPreview() {
   const showOptionsInCurrent = nodes[currentNodeIdx]?.type === "options" && messages.some((m) => m.type === "options")
 
   return (
-    <div className={cn("flex h-full flex-col rounded-xl border shadow-sm overflow-hidden dark:border-gray-700", !bgColor && "dark:bg-gray-800")}
+    <div className={cn("flex h-full flex-col rounded-xl border shadow-sm overflow-hidden ", !bgColor && "")}
       style={{ backgroundColor: bgColor || undefined }}
     >
       <div className="flex items-center gap-2 border-b px-4 py-3" style={{ backgroundColor: themeColor || "#3b82f6" }}>
@@ -235,7 +235,7 @@ export function ChatPreview() {
                 )}
                 {msg.role === "system" && msg.type === "condition" && (
                   <div className="flex justify-center my-1">
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-xs text-red-600 dark:text-red-400 font-mono">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50  border border-red-200  text-xs text-red-600  font-mono">
                       <Terminal className="h-3 w-3" />
                       {(msg as any).data?.condExpr || `${(msg as any).data?.condVariable || ""} ${(msg as any).data?.condOperator || ""} ${(msg as any).data?.condValue || ""}`}
                     </div>
@@ -244,7 +244,7 @@ export function ChatPreview() {
                 {(msg.role === "bot" || msg.role === "user") && (
                   <div className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                     <div className={cn("max-w-[80%] rounded-2xl px-4 py-2 text-sm leading-relaxed",
-                      msg.role === "user" ? "rounded-br-md" : "rounded-bl-md bg-gray-100 dark:bg-gray-800"
+                      msg.role === "user" ? "rounded-br-md" : "rounded-bl-md bg-gray-100 "
                     )}
                       style={msg.role === "user"
                         ? { backgroundColor: themeColor || undefined, color: "#fff" }
@@ -259,7 +259,7 @@ export function ChatPreview() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-gray-100  px-4 py-2 text-sm text-gray-500">
                   <Loader2 className="h-4 w-4 animate-spin" /> Processing...
                 </div>
               </div>
@@ -279,9 +279,9 @@ export function ChatPreview() {
       </div>
 
       {messages.length > 0 && !finished && (
-        <div className={cn("border-t dark:border-gray-700 p-3", !bgColor && "dark:bg-gray-800")} style={{ backgroundColor: bgColor || undefined }}>
+        <div className={cn("border-t  p-3", !bgColor && "")} style={{ backgroundColor: bgColor || undefined }}>
           {showOptionsInCurrent && awaitingInput ? (
-            <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-gray-400 ">
               <Check className="h-4 w-4" /> Select an option above
             </div>
           ) : (
@@ -291,7 +291,7 @@ export function ChatPreview() {
                 onKeyDown={handleKeyDown}
                 disabled={!awaitingInput || loading}
                 placeholder={awaitingInput ? "Type a message..." : loading ? "Processing..." : "Waiting..."}
-                className="flex-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400 disabled:opacity-50"
+                className="flex-1 rounded-lg border border-gray-200  bg-gray-50   px-3 py-2 text-sm outline-none focus:border-blue-400 disabled:opacity-50"
               />
               <button onClick={handleSend}
                 disabled={!awaitingInput || loading}

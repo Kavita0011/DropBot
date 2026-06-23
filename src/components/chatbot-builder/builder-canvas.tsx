@@ -332,7 +332,7 @@ export const BuilderCanvas = memo(forwardRef<BuilderCanvasHandle, { nodes: FlowN
   const cursorStyle = isDragging ? "grabbing" : connectingFrom ? "crosshair" : "grab"
 
   return (
-    <div ref={containerRef} className="relative flex-1 overflow-hidden bg-[#f8fafc] dark:bg-gray-950 select-none">
+    <div ref={containerRef} className="relative flex-1 overflow-hidden bg-[#f8fafc]  select-none">
       <div
         ref={canvasRef}
         className={cn("absolute inset-0", cursorStyle === "grab" && "cursor-grab", cursorStyle === "grabbing" && "cursor-grabbing", cursorStyle === "crosshair" && "cursor-crosshair")}
@@ -349,14 +349,14 @@ export const BuilderCanvas = memo(forwardRef<BuilderCanvasHandle, { nodes: FlowN
 
           {nodes.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center bg-white/90 dark:bg-gray-800/90 rounded-2xl px-8 py-8 shadow-md border border-gray-200 dark:border-gray-700 max-w-sm">
+              <div className="text-center bg-white/90  rounded-2xl px-8 py-8 shadow-md border border-gray-200  max-w-sm">
                 <MousePointerClick className="h-8 w-8 text-blue-400 mx-auto mb-3" />
-                <p className="text-base font-semibold text-gray-700 dark:text-gray-200">Start Building Your Flow</p>
+                <p className="text-base font-semibold text-gray-700 ">Start Building Your Flow</p>
                 <p className="text-sm text-gray-400 mt-2 leading-relaxed">Drag a node from the left panel to begin.<br />Click the bottom dot to connect nodes.</p>
                 <div className="mt-4 flex gap-2 justify-center text-[10px] text-gray-300">
-                  <span className="bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">Ctrl+Scroll Zoom</span>
-                  <span className="bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">Drag to Pan</span>
-                  <span className="bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">Shift+Drag Select</span>
+                  <span className="bg-gray-50  px-2 py-1 rounded">Ctrl+Scroll Zoom</span>
+                  <span className="bg-gray-50  px-2 py-1 rounded">Drag to Pan</span>
+                  <span className="bg-gray-50  px-2 py-1 rounded">Shift+Drag Select</span>
                 </div>
               </div>
             </div>
@@ -392,43 +392,43 @@ export const BuilderCanvas = memo(forwardRef<BuilderCanvasHandle, { nodes: FlowN
         </div>
       </div>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-1.5 z-40">
-        <button onClick={zoomOut} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"><Minus className="h-4 w-4" /></button>
-        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 min-w-[36px] text-center">{Math.round(zoom * 100)}%</span>
-        <button onClick={zoomIn} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"><Plus className="h-4 w-4" /></button>
-        <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-0.5" />
-        <button onClick={zoomToFit} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400" title="Fit to screen"><Maximize2 className="h-4 w-4" /></button>
-        <button onClick={resetView} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400" title="Reset zoom"><Minimize2 className="h-4 w-4" /></button>
-        <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-0.5" />
-        <button onClick={toggleGrid} className={cn("p-1.5 rounded-lg transition-colors", showGrid ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400")} title="Toggle grid"><Grid3X3 className="h-4 w-4" /></button>
-        <button onClick={toggleSnap} className={cn("p-1.5 rounded-lg transition-colors", snapToGrid ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400")} title="Toggle snap"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="1"/></svg></button>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white  rounded-xl shadow-lg border border-gray-200  p-1.5 z-40">
+        <button onClick={zoomOut} className="p-1.5 rounded-lg hover:bg-gray-100  text-gray-500 "><Minus className="h-4 w-4" /></button>
+        <span className="text-xs font-medium text-gray-600  min-w-[36px] text-center">{Math.round(zoom * 100)}%</span>
+        <button onClick={zoomIn} className="p-1.5 rounded-lg hover:bg-gray-100  text-gray-500 "><Plus className="h-4 w-4" /></button>
+        <div className="w-px h-5 bg-gray-200  mx-0.5" />
+        <button onClick={zoomToFit} className="p-1.5 rounded-lg hover:bg-gray-100  text-gray-500 " title="Fit to screen"><Maximize2 className="h-4 w-4" /></button>
+        <button onClick={resetView} className="p-1.5 rounded-lg hover:bg-gray-100  text-gray-500 " title="Reset zoom"><Minimize2 className="h-4 w-4" /></button>
+        <div className="w-px h-5 bg-gray-200  mx-0.5" />
+        <button onClick={toggleGrid} className={cn("p-1.5 rounded-lg transition-colors", showGrid ? "bg-blue-50  text-blue-600 " : "hover:bg-gray-100  text-gray-400")} title="Toggle grid"><Grid3X3 className="h-4 w-4" /></button>
+        <button onClick={toggleSnap} className={cn("p-1.5 rounded-lg transition-colors", snapToGrid ? "bg-blue-50  text-blue-600 " : "hover:bg-gray-100  text-gray-400")} title="Toggle snap"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="1"/></svg></button>
       </div>
 
       {connectingFrom && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-xl px-4 py-2 text-sm font-medium shadow-lg z-40 flex items-center gap-2">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-green-50  text-green-700  border border-green-200  rounded-xl px-4 py-2 text-sm font-medium shadow-lg z-40 flex items-center gap-2">
           <span className="animate-pulse">●</span> Drop on a target node to connect
         </div>
       )}
 
       {selectedEdgeId && (
-        <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 shadow-lg z-40 flex items-center gap-3 text-sm">
-          <span className="text-gray-500 dark:text-gray-400">Edge selected</span>
-          <button onClick={() => removeEdge(selectedEdgeId)} className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-700 font-medium">
+        <div className="absolute top-4 right-4 bg-white  border border-gray-200  rounded-xl px-4 py-2 shadow-lg z-40 flex items-center gap-3 text-sm">
+          <span className="text-gray-500 ">Edge selected</span>
+          <button onClick={() => removeEdge(selectedEdgeId)} className="flex items-center gap-1 text-red-600  hover:text-red-700 font-medium">
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
         </div>
       )}
 
       {contextMenu && (
-        <div className="fixed z-[100] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[160px]" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(e) => e.stopPropagation()}>
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30" onClick={() => { setContextMenu(null); pasteNodes(contextMenu.canvasX, contextMenu.canvasY) }}>
+        <div className="fixed z-[100] bg-white  rounded-xl shadow-2xl border border-gray-200  py-1.5 min-w-[160px]" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(e) => e.stopPropagation()}>
+          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700  hover:bg-blue-50 " onClick={() => { setContextMenu(null); pasteNodes(contextMenu.canvasX, contextMenu.canvasY) }}>
             <Plus className="h-3.5 w-3.5" /> Paste here
           </button>
-          <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" onClick={() => { zoomToFit(); setContextMenu(null) }}>
+          <div className="border-t border-gray-100  my-1" />
+          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700  hover:bg-gray-50 " onClick={() => { zoomToFit(); setContextMenu(null) }}>
             <Maximize2 className="h-3.5 w-3.5" /> Fit to screen
           </button>
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" onClick={() => { resetView(); setContextMenu(null) }}>
+          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700  hover:bg-gray-50 " onClick={() => { resetView(); setContextMenu(null) }}>
             <Minimize2 className="h-3.5 w-3.5" /> Reset zoom
           </button>
         </div>

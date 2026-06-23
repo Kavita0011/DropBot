@@ -52,8 +52,8 @@ export function TabsTrigger({
     <button
       onClick={() => onValueChange(value)}
       className={cn(
-        "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors dark:text-gray-400 dark:hover:text-gray-200",
-        selected === value && "text-blue-600 dark:text-blue-400",
+        "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors  ",
+        selected === value && "text-blue-600 ",
         className
       )}
     >

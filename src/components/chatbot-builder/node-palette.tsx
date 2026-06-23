@@ -27,14 +27,14 @@ function PaletteItem({ type, label, icon, color }: (typeof nodeTypes)[0]) {
       {...listeners}
       {...attributes}
       className={cn(
-        "flex cursor-grab items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm active:cursor-grabbing",
+        "flex cursor-grab items-center gap-3 rounded-lg border border-gray-200  bg-white  px-3 py-2.5 text-sm transition-colors hover:border-gray-300  hover:shadow-sm active:cursor-grabbing",
         isDragging && "opacity-50 shadow-lg"
       )}
     >
       <div className={cn("flex h-7 w-7 items-center justify-center rounded-md text-white", color)}>
         {icon}
       </div>
-      <span className="font-medium text-gray-700 dark:text-gray-200">{label}</span>
+      <span className="font-medium text-gray-700 ">{label}</span>
     </div>
   )
 }
@@ -42,7 +42,7 @@ function PaletteItem({ type, label, icon, color }: (typeof nodeTypes)[0]) {
 export function NodePalette() {
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Nodes</h3>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 ">Nodes</h3>
       <div className="space-y-1.5">
         {nodeTypes.map((item) => (
           <PaletteItem key={item.type} {...item} />

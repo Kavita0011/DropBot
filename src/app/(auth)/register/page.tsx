@@ -57,7 +57,7 @@ export default function RegisterPage() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
-          <MessageSquare className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+          <MessageSquare className="h-10 w-10 text-blue-600 " />
         </div>
         <CardTitle className="text-2xl">Create account</CardTitle>
         <CardDescription>Start building chatbots for free</CardDescription>
@@ -88,7 +88,7 @@ export default function RegisterPage() {
       <CardFooter className="justify-center">
         <p className="text-sm text-gray-500">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">Sign in</Link>
+          <Link href="/login" className="font-medium text-blue-600  hover:text-blue-500 ">Sign in</Link>
         </p>
       </CardFooter>
     </Card>

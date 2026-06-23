@@ -40,7 +40,7 @@ export default function LoginPage() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
-          <MessageSquare className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+          <MessageSquare className="h-10 w-10 text-blue-600 " />
         </div>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
         <CardDescription>Sign in to your DropBot account</CardDescription>
@@ -77,7 +77,7 @@ export default function LoginPage() {
       <CardFooter className="justify-center">
         <p className="text-sm text-gray-500">
           Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
+            <Link href="/register" className="font-medium text-blue-600  hover:text-blue-500 ">
             Sign up
           </Link>
         </p>

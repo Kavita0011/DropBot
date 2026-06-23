@@ -575,6 +575,7 @@ export default function AdminPage() {
                     <th className="text-center px-4 py-3 font-medium text-gray-500 text-xs uppercase">Chatbots</th>
                     <th className="text-center px-4 py-3 font-medium text-gray-500 text-xs uppercase">Nodes</th>
                     <th className="text-center px-4 py-3 font-medium text-gray-500 text-xs uppercase">Chats</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">Features</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase">Stripe ID</th>
                     <th className="text-center px-4 py-3 font-medium text-gray-500 text-xs uppercase">Status</th>
                     <th className="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase">Actions</th>
@@ -594,6 +595,9 @@ export default function AdminPage() {
                       <td className="px-4 py-3 text-center">{plan.chatbots === -1 ? "∞" : plan.chatbots}</td>
                       <td className="px-4 py-3 text-center">{plan.nodes === -1 ? "∞" : plan.nodes}</td>
                       <td className="px-4 py-3 text-center">{plan.chats === -1 ? "∞" : plan.chats.toLocaleString()}</td>
+                      <td className="px-4 py-3">
+                        {(() => { try { const feats = JSON.parse(plan.features || "[]"); return feats.length ? <div className="flex flex-col gap-0.5">{feats.map((f: string, i: number) => <span key={i} className="text-[11px] text-gray-500 truncate max-w-[180px]">• {f}</span>)}</div> : <span className="text-xs text-gray-300">—</span> } catch { return <span className="text-xs text-gray-300">—</span> }})()}
+                      </td>
                       <td className="px-4 py-3 text-xs text-gray-400 font-mono">{plan.priceId || "—"}</td>
                       <td className="px-4 py-3 text-center"><Badge variant={plan.active ? "success" : "secondary"} className="text-[10px]">{plan.active ? "Active" : "Hidden"}</Badge></td>
                       <td className="px-4 py-3 text-right">

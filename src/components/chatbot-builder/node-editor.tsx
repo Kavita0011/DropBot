@@ -37,13 +37,13 @@ export function NodeEditor() {
     return (
       <div className="h-full overflow-y-auto p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Edge Properties</h3>
-          <button onClick={() => { removeEdge(selectedEdge.id) }} className="text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
+          <h3 className="text-sm font-semibold text-gray-900 ">Edge Properties</h3>
+          <button onClick={() => { removeEdge(selectedEdge.id) }} className="text-gray-400  hover:text-red-500 transition-colors">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50  rounded-lg p-3">
             <span className="font-medium">{source?.type || "?"}</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
             <span className="font-medium">{target?.type || "?"}</span>
@@ -52,7 +52,7 @@ export function NodeEditor() {
             <Label>Label</Label>
             <Input value={selectedEdge.label || ""} onChange={(e) => updateEdge(selectedEdge.id, { label: e.target.value })} placeholder="e.g. Yes / No" className="h-9 text-sm" />
           </div>
-          <Button variant="outline" size="sm" className="w-full text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-900/30 gap-1" onClick={() => removeEdge(selectedEdge.id)}>
+          <Button variant="outline" size="sm" className="w-full text-red-600  border-red-200  hover:bg-red-50  gap-1" onClick={() => removeEdge(selectedEdge.id)}>
             <Trash2 className="h-3.5 w-3.5" /> Delete Connection
           </Button>
         </div>
@@ -63,7 +63,7 @@ export function NodeEditor() {
   if (!selectedNode) {
     return (
       <div className="flex h-full items-center justify-center p-6">
-        <p className="text-sm text-gray-400 dark:text-gray-500 text-center">Select a node or edge to edit</p>
+        <p className="text-sm text-gray-400  text-center">Select a node or edge to edit</p>
       </div>
     )
   }
@@ -106,8 +106,8 @@ function NodeForm({ node }: { node: { id: string; type: string; data: Record<str
   return (
     <div className="h-full overflow-y-auto p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Edit Node</h3>
-        <button onClick={() => { removeNode(node.id); selectNode(null) }} className="text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
+        <h3 className="text-sm font-semibold text-gray-900 ">Edit Node</h3>
+        <button onClick={() => { removeNode(node.id); selectNode(null) }} className="text-gray-400  hover:text-red-500 transition-colors">
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
@@ -140,7 +140,7 @@ function NodeForm({ node }: { node: { id: string; type: string; data: Record<str
                 </div>
               ))}
               {choices.length > 0 && (
-                <p className="text-[10px] text-gray-400 dark:text-gray-500">Connect edges from this node for each choice. Set edge labels to match.</p>
+                <p className="text-[10px] text-gray-400 ">Connect edges from this node for each choice. Set edge labels to match.</p>
               )}
             </div>
           </>
@@ -155,7 +155,7 @@ function NodeForm({ node }: { node: { id: string; type: string; data: Record<str
             <div className="space-y-2">
               <Label>Variable Name</Label>
               <Input value={variable} onChange={(e) => updateData("variable", e.target.value)} onBlur={commitHistory} placeholder="e.g., user_email" />
-              <p className="text-[10px] text-gray-400 dark:text-gray-500">Stores user input in this variable for use in conditions</p>
+              <p className="text-[10px] text-gray-400 ">Stores user input in this variable for use in conditions</p>
             </div>
           </>
         )}
@@ -169,7 +169,7 @@ function NodeForm({ node }: { node: { id: string; type: string; data: Record<str
             <div className="space-y-2">
               <Label>Operator</Label>
               <select value={condOperator} onChange={(e) => updateData("condOperator", e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+                className="flex h-10 w-full rounded-lg border border-gray-300  bg-white  px-3 py-2 text-sm">
                 <option value="equals">equals</option>
                 <option value="not_equals">not equals</option>
                 <option value="contains">contains</option>
@@ -186,12 +186,12 @@ function NodeForm({ node }: { node: { id: string; type: string; data: Record<str
               </div>
             )}
             {conditionExpr && (
-              <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-2">
-                <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Preview:</p>
-                <p className="text-xs font-mono text-red-600 dark:text-red-400">{conditionExpr}</p>
+              <div className="rounded-lg bg-gray-50  p-2">
+                <p className="text-[10px] text-gray-400  mb-1">Preview:</p>
+                <p className="text-xs font-mono text-red-600 ">{conditionExpr}</p>
               </div>
             )}
-            <p className="text-[10px] text-gray-400 dark:text-gray-500">Add two edges from this node with labels like "True" and "False" for each branch.</p>
+            <p className="text-[10px] text-gray-400 ">Add two edges from this node with labels like "True" and "False" for each branch.</p>
           </div>
         )}
 
@@ -204,7 +204,7 @@ function NodeForm({ node }: { node: { id: string; type: string; data: Record<str
             <div className="space-y-2">
               <Label>Method</Label>
               <select value={(node.data.method as string) || "GET"} onChange={(e) => updateData("method", e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+                className="flex h-10 w-full rounded-lg border border-gray-300  bg-white  px-3 py-2 text-sm">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
               </select>
