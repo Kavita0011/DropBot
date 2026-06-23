@@ -8,7 +8,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chatbotI
     where: { id: chatbotId },
     select: {
       id: true, name: true, welcomeMsg: true, themeColor: true, bgColor: true,
-      textColor: true, position: true, logoUrl: true, status: true, createdAt: true,
+      textColor: true, position: true, logoUrl: true, createdAt: true,
     },
   })
 

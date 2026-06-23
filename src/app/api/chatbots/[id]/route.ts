@@ -20,8 +20,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return NextResponse.json(chatbot)
 }
 
-const USER_STATUSES = ["draft", "pending_review", "approved"] as const
-const ADMIN_STATUSES = ["approved", "rejected"] as const
 const ALLOWED_FIELDS = ["name", "description", "welcomeMsg", "themeColor", "accentColor", "position", "bgColor", "textColor", "flowData", "logoUrl"] as const
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -41,17 +39,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  const isAdmin = (session?.user as { role?: string })?.role === "admin"
   const data: Record<string, unknown> = {}
   for (const field of ALLOWED_FIELDS) {
     if (body[field] !== undefined) data[field] = body[field]
-  }
-  if (body.status !== undefined) {
-    if (isAdmin && [...ADMIN_STATUSES, ...USER_STATUSES].includes(body.status)) {
-      data.status = body.status
-    } else if (!isAdmin && USER_STATUSES.includes(body.status)) {
-      data.status = body.status
-    }
   }
 
   const updated = await prisma.chatbot.update({
@@ -69,8 +59,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   }
 
   const { id } = await params
+  const isAdmin = (session.user as { role?: string }).role === "admin"
+
   await prisma.chatbot.deleteMany({
-    where: { id, userId: session.user.id },
+    where: isAdmin ? { id } : { id, userId: session.user.id },
   })
 
   return NextResponse.json({ success: true })

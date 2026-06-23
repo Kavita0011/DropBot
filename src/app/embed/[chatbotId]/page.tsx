@@ -12,7 +12,6 @@ interface ChatbotData {
   bgColor: string
   textColor: string
   position: string
-  status: string
   logoUrl: string | null
 }
 

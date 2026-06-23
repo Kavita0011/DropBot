@@ -231,6 +231,18 @@ export default function AdminPage() {
     else { const e = await res.json(); toast.error(e.error || "Failed to delete plan") }
   }
 
+  const handleDeleteChatbot = async (id: string) => {
+    if (!confirm("Delete this chatbot? This cannot be undone.")) return
+    const res = await fetch(`/api/chatbots/${id}`, { method: "DELETE" })
+    if (res.ok) {
+      toast.success("Chatbot deleted")
+      setChatbots((prev) => prev.filter((b) => b.id !== id))
+    } else {
+      const e = await res.json()
+      toast.error(e.error || "Failed to delete chatbot")
+    }
+  }
+
   const filteredUsers = useMemo(() => {
     if (!userSearch) return users
     const q = userSearch.toLowerCase()
@@ -491,12 +503,12 @@ export default function AdminPage() {
                       <td className="px-4 py-3"><Badge variant={b.status === "approved" ? "success" : b.status === "pending_review" ? "warning" : b.status === "rejected" ? "destructive" : "secondary"} className="text-[10px]">{b.status.replace("_", " ")}</Badge></td>
                       <td className="px-4 py-3 text-xs text-gray-500">{new Date(b.updatedAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3">
-                        {b.status === "pending_review" && (
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" className="h-7 text-xs text-green-600" onClick={() => handleModerate(b.id, "approved")}><CheckCircle className="h-3.5 w-3.5 mr-1" />Approve</Button>
-                            <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600" onClick={() => handleModerate(b.id, "rejected")}><XCircle className="h-3.5 w-3.5 mr-1" />Reject</Button>
-                          </div>
-                        )}
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="ghost" className="h-7 text-xs" asChild>
+                            <a href={`/dashboard/chatbots/${b.id}`}><Pencil className="h-3.5 w-3.5 mr-1" />Edit</a>
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600" onClick={() => handleDeleteChatbot(b.id)}><Trash2 className="h-3.5 w-3.5 mr-1" />Delete</Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -651,7 +663,7 @@ export default function AdminPage() {
                       if (selectedChatbots.length > 0) {
                         handleBulkModerate("rejected", rejectComment)
                       } else {
-                        handleSingleModerate rejecting, "rejected", rejectComment)
+                        handleSingleModerate(rejecting!, "rejected")
                       }
                       setShowRejectDialog(false)
                       setRejectComment("")
