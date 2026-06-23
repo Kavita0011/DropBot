@@ -86,15 +86,19 @@ export default function AdminPage() {
   const [payments, setPayments] = useState<AdminPayment[]>([])
   const [loading, setLoading] = useState(true)
   const [moderating, setModerating] = useState<string | null>(null)
+  const [rejecting, setRejecting] = useState<string | null>(null)
+  const [rejectComment, setRejectComment] = useState("")
   const [userSearch, setUserSearch] = useState("")
   const [chatbotSearch, setChatbotSearch] = useState("")
   const [chatbotFilter, setChatbotFilter] = useState<string>("all")
+  const [selectedChatbots, setSelectedChatbots] = useState<string[]>([])
   const [userPage, setUserPage] = useState(0)
   const [chatbotPage, setChatbotPage] = useState(0)
   const [plans, setPlans] = useState<any[]>([])
   const [editingPlan, setEditingPlan] = useState<any | null>(null)
   const [showPlanForm, setShowPlanForm] = useState(false)
   const [featureInput, setFeatureInput] = useState("")
+  const [showRejectDialog, setShowRejectDialog] = useState(false)
 
   const isAdmin = (session?.user as { role?: string })?.role === "admin"
 
@@ -116,6 +120,59 @@ export default function AdminPage() {
       .catch(() => toast.error("Failed to load admin data"))
       .finally(() => setLoading(false))
   }, [status, isAdmin])
+
+  const handleBulkModerate = async (action: "approved" | "rejected", comment?: string) => {
+    if (selectedChatbots.length === 0) return
+    setModerating(selectedChatbots[0])
+    try {
+      const res = await fetch("/api/admin/moderation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatbotIds: selectedChatbots, status: action, comment })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        toast.success(`${action === "approved" ? "Approved" : "Rejected"} ${data.updated} chatbot(s)`)
+        setPending((prev) => prev.filter((p) => !selectedChatbots.includes(p.id)))
+        setSelectedChatbots([])
+      } else {
+        const error = await res.json()
+        toast.error(error.error || "Failed to moderate chatbots")
+      }
+    } catch {
+      toast.error("Failed to moderate chatbots")
+    } finally {
+      setModerating(null)
+    }
+  }
+
+  const handleSingleModerate = async (chatbotId: string, status: "approved" | "rejected") => {
+    setModerating(chatbotId)
+    const comment = status === "rejected" ? rejectComment : undefined
+    try {
+      const res = await fetch("/api/admin/moderation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatbotId, status, comment })
+      })
+      if (res.ok) {
+        toast.success(status === "approved" ? "Approved!" : "Rejected")
+        setPending((prev) => prev.filter((p) => p.id !== chatbotId))
+        if (status === "rejected") {
+          setShowRejectDialog(false)
+          setRejectComment("")
+          setRejecting(null)
+        }
+      } else {
+        const error = await res.json()
+        toast.error(error.error || "Failed to update")
+      }
+    } catch {
+      toast.error("Failed to update")
+    } finally {
+      setModerating(null)
+    }
+  }
 
   const handleModerate = async (chatbotId: string, status: "approved" | "rejected") => {
     setModerating(chatbotId)
@@ -462,6 +519,54 @@ export default function AdminPage() {
 
       {tab === "moderation" && (
         <div className="space-y-4">
+          {pending.length > 0 && (
+            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border">
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={selectedChatbots.length > 0 && selectedChatbots.length === pending.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedChatbots(pending.map((p) => p.id))
+                      } else {
+                        setSelectedChatbots([])
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span>Select all ({pending.length})</span>
+                </label>
+                {selectedChatbots.length > 0 && (
+                  <button
+                    onClick={() => setShowRejectDialog(true)}
+                    className="text-sm text-red-600 hover:text-red-700 font-medium"
+                  >Reject selected...</button>
+                )}
+              </div>
+              {selectedChatbots.length > 0 && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="gap-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => handleBulkModerate("approved")}
+                    disabled={moderating !== null}
+                  >
+                    <ShieldCheck className="h-4 w-4" /> Approve Selected ({selectedChatbots.length})
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={() => setShowRejectDialog(true)}
+                    disabled={moderating !== null}
+                  >
+                    <ShieldX className="h-4 w-4" /> Reject Selected ({selectedChatbots.length})
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
           {pending.length === 0 ? (
             <Card><CardContent className="flex flex-col items-center justify-center py-16 text-gray-400">
               <ShieldCheck className="h-12 w-12 mb-4 text-green-300" />
@@ -469,25 +574,56 @@ export default function AdminPage() {
               <p className="text-sm mt-1">No chatbots pending review.</p>
             </CardContent></Card>
           ) : pending.map((bot) => (
-            <Card key={bot.id} className="border-l-4 border-l-yellow-400">
+            <Card
+              key={bot.id}
+              className={`border-l-4 ${selectedChatbots.includes(bot.id) ? "border-l-blue-500 bg-blue-50/30" : "border-l-yellow-400"}`}
+            >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{bot.name}</h3>
-                      <Badge variant="warning" className="text-[10px]">Pending</Badge>
-                    </div>
-                    <p className="text-sm text-gray-500">{bot.description || "No description"}</p>
-                    <div className="flex items-center gap-4 pt-1">
-                      <span className="text-xs text-gray-400 flex items-center gap-1"><UserCog className="h-3 w-3" /> {bot.user.name || bot.user.email}</span>
-                      <span className="text-xs text-gray-400 flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(bot.updatedAt).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-3 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedChatbots.includes(bot.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedChatbots([...selectedChatbots, bot.id])
+                        } else {
+                          setSelectedChatbots(selectedChatbots.filter((id) => id !== bot.id))
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 mt-1"
+                    />
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-gray-900">{bot.name}</h3>
+                        <Badge variant="warning" className="text-[10px]">Pending</Badge>
+                      </div>
+                      <p className="text-sm text-gray-500">{bot.description || "No description"}</p>
+                      <div className="flex items-center gap-4 pt-1">
+                        <span className="text-xs text-gray-400 flex items-center gap-1"><UserCog className="h-3 w-3" /> {bot.user.name || bot.user.email}</span>
+                        <span className="text-xs text-gray-400 flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(bot.updatedAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <Button size="sm" className="gap-1" onClick={() => handleModerate(bot.id, "approved")} disabled={moderating === bot.id}>
+                    <Button
+                      size="sm"
+                      className="gap-1 bg-green-600 hover:bg-green-700"
+                      onClick={() => handleSingleModerate(bot.id, "approved")}
+                      disabled={moderating === bot.id}
+                    >
                       <ShieldCheck className="h-4 w-4" /> Approve
                     </Button>
-                    <Button size="sm" variant="outline" className="gap-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleModerate(bot.id, "rejected")} disabled={moderating === bot.id}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                      onClick={() => {
+                        setRejecting(bot.id)
+                        setShowRejectDialog(true)
+                      }}
+                      disabled={moderating === bot.id}
+                    >
                       <ShieldX className="h-4 w-4" /> Reject
                     </Button>
                   </div>
@@ -495,6 +631,51 @@ export default function AdminPage() {
               </CardContent>
             </Card>
           ))}
+          {showRejectDialog && (
+            <Card className="border-red-200 bg-red-50/50">
+              <CardContent className="p-4">
+                <h4 className="font-medium text-red-900 mb-2">Reject Chatbot</h4>
+                <p className="text-sm text-red-700 mb-3">Please provide a reason for rejection (shown to the user):</p>
+                <textarea
+                  value={rejectComment}
+                  onChange={(e) => setRejectComment(e.target.value)}
+                  placeholder="e.g., 'Content violates community guidelines'"
+                  className="w-full p-2 border border-red-300 rounded text-sm"
+                  rows={3}
+                />
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      if (selectedChatbots.length > 0) {
+                        handleBulkModerate("rejected", rejectComment)
+                      } else {
+                        handleSingleModerate rejecting, "rejected", rejectComment)
+                      }
+                      setShowRejectDialog(false)
+                      setRejectComment("")
+                      setRejecting(null)
+                    }}
+                    disabled={!rejectComment.trim() || moderating !== null}
+                  >
+                    Confirm Rejection
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setShowRejectDialog(false)
+                      setRejectComment("")
+                      setRejecting(null)
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
