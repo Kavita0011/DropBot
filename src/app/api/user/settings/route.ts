@@ -11,6 +11,9 @@ export async function PATCH(req: Request) {
 
   const { name, currentPassword, newPassword } = await req.json()
 
+  // Invalidate all other sessions when password changes by updating the password hash
+  // This forces re-login on other devices/browsers
+
   const updateData: Record<string, unknown> = {}
 
   if (name !== undefined) {

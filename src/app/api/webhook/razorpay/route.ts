@@ -7,12 +7,16 @@ export async function POST(req: Request) {
   const body = await req.text()
   const signature = req.headers.get("x-razorpay-signature")
 
-  if (secret && signature) {
-    const expected = createHmac("sha256", secret).update(body).digest()
-    const sig = Buffer.from(signature, "hex")
-    if (expected.length !== sig.length || !timingSafeEqual(expected, sig)) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
-    }
+  if (!secret) {
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
+  }
+  if (!signature) {
+    return NextResponse.json({ error: "Missing signature" }, { status: 401 })
+  }
+  const expected = createHmac("sha256", secret).update(body).digest()
+  const sig = Buffer.from(signature, "hex")
+  if (expected.length !== sig.length || !timingSafeEqual(expected, sig)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
   }
 
   let event: any

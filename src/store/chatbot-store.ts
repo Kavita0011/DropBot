@@ -86,7 +86,8 @@ function snapshot(get: () => ChatbotStore): HistoryEntry {
 
 // Pushes a history snapshot before mutations; caps at 50 entries to limit memory; clears future on new action
 function pushHistory(set: any, get: () => ChatbotStore) {
-  set((s: ChatbotStore) => ({ past: [...s.past.slice(-50), snapshot(get)], future: [] }))
+  const current = snapshot(get)
+  set((s: ChatbotStore) => ({ past: [...s.past.slice(-50), current], future: [] }))
 }
 
 // Guard: rejects self-loops and duplicate edges (same source-target pair)

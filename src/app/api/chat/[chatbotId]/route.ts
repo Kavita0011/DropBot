@@ -34,9 +34,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ chatbot
     const flowData = JSON.parse(chatbot.flowData)
     const reply = await generateChatReply(chatbotId, message, history, flowData)
 
-    // Session scoped per chatbot + day + visitor — reuses same-day sessions for continuity via upsert
+    // Session scoped per chatbot + visitor — uses server-generated UUID to prevent enumeration
     const dateStr = new Date().toISOString().split("T")[0]
-    const sessionId = `session-${chatbotId}-${dateStr}-${visitorId}`
+    const sessionId = `session-${chatbotId}-${dateStr}-${crypto.randomUUID()}`
 
     let session = await prisma.chatSession.upsert({
       where: { id: sessionId },

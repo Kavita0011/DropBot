@@ -141,6 +141,7 @@ model Payment {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([razorpayOrderId])
 }
 
 model ChatSession {
@@ -168,6 +169,7 @@ model Message {
   session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId, createdAt])
+  @@index([createdAt])
 }
 
 model PlatformSettings {

@@ -1,13 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/dashboard/sidebar"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/login")
+  }, [status, router])
 
   if (status === "loading") {
     return (
@@ -17,9 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     )
   }
 
-  if (status === "unauthenticated") {
-    redirect("/login")
-  }
+  if (status === "unauthenticated") return null
 
   return (
     <div className="flex h-screen overflow-hidden">

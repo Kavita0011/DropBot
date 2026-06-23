@@ -8,7 +8,8 @@ import bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function main() {
-  const seedPassword = process.env.SEED_PASSWORD || "password123"
+  const seedPassword = process.env.SEED_PASSWORD
+  if (!seedPassword) throw new Error("SEED_PASSWORD env var is required for seeding")
   const password = await bcrypt.hash(seedPassword, 12)
 
   const admin = await prisma.user.upsert({

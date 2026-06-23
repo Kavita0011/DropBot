@@ -4,6 +4,15 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   try {
+    // CSRF: registration must come from same origin
+    const origin = req.headers.get("origin")
+    const referer = req.headers.get("referer")
+    const host = req.headers.get("host") || ""
+    const source = (origin || referer || "").toLowerCase()
+    if (!source.includes(host) && !source.includes(process.env.NEXT_PUBLIC_APP_URL?.replace(/https?:\/\//, "") || "")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
     let { name, email, password } = await req.json()
 
     if (!email || !password) {

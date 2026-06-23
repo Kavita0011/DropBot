@@ -113,7 +113,7 @@ export default function EmbedPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "white" }}>
-              {chatbot.logoUrl ? (
+              {chatbot.logoUrl && /^(https?:\/\/|\/uploads\/)/.test(chatbot.logoUrl) ? (
                 <img src={chatbot.logoUrl} alt="" style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "contain" }} />
               ) : (
                 <MessageSquare className="h-5 w-5" />

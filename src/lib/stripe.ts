@@ -1,9 +1,12 @@
 import Stripe from "stripe"
 
+let stripeInstance: Stripe | null = null
 function getStripe() {
+  if (stripeInstance) return stripeInstance
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) return null
-  return new Stripe(key, { apiVersion: "2026-05-27.dahlia" })
+  stripeInstance = new Stripe(key, { apiVersion: "2026-05-27.dahlia" })
+  return stripeInstance
 }
 
 export const stripe = getStripe()

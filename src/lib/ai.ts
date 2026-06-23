@@ -33,8 +33,9 @@ async function getAIReply(messages: { role: "system" | "user" | "assistant"; con
   const openai = getOpenAI()
   if (!openai) return null
 
+  const modelName = process.env.OPENAI_MODEL || "gpt-4o-mini"
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: modelName,
     messages,
     max_tokens: 200,
     temperature: 0.7,
@@ -44,7 +45,7 @@ async function getAIReply(messages: { role: "system" | "user" | "assistant"; con
 }
 
 // Fallback flow engine: walks the node graph based on current node type.
-// Used when OpenAI is unavailable — handles welcome, message, options, input, and end nodes.
+// Used when OpenAI is unavailable — handles all 7 node types.
 function getLocalReply(nodes: FlowNode[], edges: FlowEdge[], currentNodeId: string | null, userMessage: string): { reply: string; nextNodeId: string | null } {
   if (!currentNodeId) {
     const welcome = nodes.find((n) => n.type === "welcome")
@@ -62,13 +63,37 @@ function getLocalReply(nodes: FlowNode[], edges: FlowEdge[], currentNodeId: stri
   if (currentNode.type === "options") {
     const question = currentNode.data?.question as string || "Please choose:"
     const match = edges.find((e) => e.source === currentNode.id && e.label?.toLowerCase() === userMessage.toLowerCase())
-    return { reply: question, nextNodeId: match?.target || null }
+    if (match) {
+      const options = currentNode.data?.options as Array<{ label: string; text: string }> | undefined
+      const matchedOption = options?.find((o) => o.label?.toLowerCase() === userMessage.toLowerCase())
+      return { reply: matchedOption?.text || question, nextNodeId: match.target }
+    }
+    return { reply: question, nextNodeId: currentNode.id }
   }
 
   if (currentNode.type === "input") {
     const question = currentNode.data?.question as string || "Please enter:"
     const connectedEdge = edges.find((e) => e.source === currentNode.id)
     return { reply: question, nextNodeId: connectedEdge?.target || null }
+  }
+
+  if (currentNode.type === "condition") {
+    const variable = currentNode.data?.variable as string || ""
+    const operator = currentNode.data?.operator as string || "equals"
+    const value = currentNode.data?.value as string || ""
+    const trueEdge = edges.find((e) => e.source === currentNode.id && e.label === "true")
+    const falseEdge = edges.find((e) => e.source === currentNode.id && e.label === "false")
+    const userVal = userMessage
+    let matched = false
+    if (operator === "equals") matched = userVal.toLowerCase() === value.toLowerCase()
+    else if (operator === "contains") matched = userVal.toLowerCase().includes(value.toLowerCase())
+    else if (operator === "not_empty") matched = userVal.trim().length > 0
+    return { reply: `Evaluating condition: ${variable} ${operator} "${value}"`, nextNodeId: matched ? (trueEdge?.target || null) : (falseEdge?.target || null) }
+  }
+
+  if (currentNode.type === "api_call") {
+    const connectedEdge = edges.find((e) => e.source === currentNode.id)
+    return { reply: currentNode.data?.successMessage as string || "API call completed.", nextNodeId: connectedEdge?.target || null }
   }
 
   if (currentNode.type === "end") {
