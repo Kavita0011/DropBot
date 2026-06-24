@@ -59,8 +59,8 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // CSRF origin check for all mutation endpoints (POST/PATCH/PUT/DELETE)
-  if (["POST", "PATCH", "PUT", "DELETE"].includes(request.method)) {
+  // CSRF origin check for all mutation endpoints except public chat/embed (called cross-origin from widgets)
+  if (["POST", "PATCH", "PUT", "DELETE"].includes(request.method) && !pathname.startsWith("/api/chat/") && !pathname.startsWith("/api/embed/")) {
     const origin = request.headers.get("origin")
     const referer = request.headers.get("referer")
     const host = request.headers.get("host") || ""
@@ -78,5 +78,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/auth/:path*", "/api/chat/:path*", "/api/user/:path*", "/api/chatbots/:path*", "/api/admin/:path*", "/api/billing/:path*", "/api/upload/:path*"],
+  matcher: ["/api/auth/:path*", "/api/chat/:path*", "/api/embed/:path*", "/api/user/:path*", "/api/chatbots/:path*", "/api/admin/:path*", "/api/billing/:path*", "/api/upload/:path*"],
 }
