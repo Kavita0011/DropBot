@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
@@ -17,6 +17,12 @@ const geistMono = Geist_Mono({
 })
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dropbot.ai"
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#2563eb",
+}
 
 export const metadata: Metadata = {
   title: {
@@ -38,7 +44,7 @@ export const metadata: Metadata = {
     siteName: "DropBot",
     title: "DropBot - AI Chatbot Builder",
     description: "Build intelligent chatbots with drag & drop. No coding required.",
-    images: [{ url: "/og-image.svg", width: 1200, height: 630, type: "image/svg+xml" }],
+    images: [{ url: "/og-image.svg", width: 1200, height: 630, type: "image/svg+xml", alt: "DropBot - AI Chatbot Builder" }],
   },
   twitter: {
     card: "summary_large_image",

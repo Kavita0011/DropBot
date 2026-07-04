@@ -1,0 +1,25 @@
+# DropBot - AI Chatbot Builder
+> Build intelligent AI chatbots with drag and drop. No coding required. Create custom conversational flows, embed on any website, and engage visitors 24/7.
+
+## Key Pages
+- [Home](https://dropbot.ai/)
+- [Pricing](https://dropbot.ai/pricing)
+- [Sign In](https://dropbot.ai/login)
+- [Create Account](https://dropbot.ai/register)
+- [Terms of Service](https://dropbot.ai/terms)
+- [Privacy Policy](https://dropbot.ai/privacy)
+- [Refund Policy](https://dropbot.ai/refund-policy)
+
+## About
+DropBot is a no-code AI chatbot builder that lets you create custom conversational flows with drag-and-drop. Features include:
+- Drag-and-drop flow builder with multiple node types (message, options, condition, API call, input capture)
+- Embed widget with popup, inline, and slide-in modes
+- AI-powered responses using OpenAI or local fallback
+- Customizable themes and branding
+- Usage-based plans from Free to Business
+- Embeddable across any website with one line of code
+
+## Pricing
+- **Free**: 1 chatbot, 10 nodes, 500 chats/month
+- **Pro** ($29/mo): 5 chatbots, 50 nodes, 5,000 chats/month
+- **Business** ($99/mo): Unlimited chatbots, unlimited nodes, unlimited chats
